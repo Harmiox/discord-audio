@@ -1,0 +1,52 @@
+{
+  "name": "stark",
+  "version": "1.0.0",
+  "description": "Music bot for discord.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Harmiox/stark.git"
+  },
+  "keywords": [
+    "discord",
+    "music",
+    "bot",
+    "stark"
+  ],
+  "author": "Juan Quenga",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Harmiox/stark/issues"
+  },
+  "homepage": "https://github.com/Harmiox/stark#readme",
+  "dependencies": {
+    "@yamdbf/core": "^3.0.2",
+    "dotenv": "^6.1.0",
+    "ffmpeg": "0.0.4",
+    "joi": "^14.3.1",
+    "node-opus": "^0.3.2",
+    "process": "^0.11.10",
+    "sequelize": "^5.9.2",
+    "simple-youtube-api": "^5.2.1",
+    "winston": "^3.2.1",
+    "yamdbf": "^3.0.1",
+    "youtube-search-promise": "^1.0.3",
+    "yt-search": "^0.4.1",
+    "ytdl-core": "^0.29.2"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.27",
+    "@types/dotenv": "^6.1.1",
+    "@types/joi": "^14.3.3",
+    "@types/node": "^12.0.12",
+    "@types/sequelize": "^4.28.3",
+    "@types/validator": "^10.11.1",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-microsoft-contrib": "^5.2.1",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.2"
+  }
+}
