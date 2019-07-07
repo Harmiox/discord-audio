@@ -1,5 +1,5 @@
 import { Command, Message } from '@yamdbf/core';
-import { Guild, RichEmbed, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
+import { Guild, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
 // @ts-ignore
 import YouTube = require('simple-youtube-api');
 import ytdl = require('ytdl-core');
@@ -19,6 +19,7 @@ import { AppLogger } from '../../util/app-logger';
 
 	 public constructor() {
 		 super({
+			aliases: [ 'p' ],
 			desc: 'Start playing music!',
 			group: 'Music',
 			guildOnly: true,
@@ -45,7 +46,7 @@ import { AppLogger } from '../../util/app-logger';
 		if (youTubeRegEx.test(args[0])) { url = args[0]; }
 
 		// User must be in a VoiceChannel
-		const voiceChannel: VoiceChannel = message.member.voiceChannel;
+		const voiceChannel: VoiceChannel = message.member.voice.channel;
 		if (!voiceChannel) { return message.reply("you must be in a voice channel to play music."); }
 
 		// Make sure the bot has permission to join and speak in a VoiceChannel
@@ -67,14 +68,52 @@ import { AppLogger } from '../../util/app-logger';
 		}
 	 }
 
+	 private async handleSoundCloud(message: Message): Promise<Message | Message[]> {
+		 return message.reply('Coming Soon.');
+	 }
+
 	 /**
 		 * Put a YouTube playlist into the queue to be played.
 		 */
 	 private async handlePlaylist(message: Message, url: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
-		const playlist: IYouTubePlaylist = await this.youtube.getPlaylist(url);
-		const videos: IYouTubeVideo[] = await playlist.getVideos();
-		for (const video of videos) {
+		try {
+			const playlist: IYouTubePlaylist = await this.youtube.getPlaylist(url);
+			const videos: IYouTubeVideo[] = await playlist.getVideos();
+			for (const video of videos) {
+				const newSong: IQueuedSong = {
+					durationSeconds: video.durationSeconds,
+					nickname: message.member.nickname,
+					playlist: playlist.title,
+					title: video.title,
+					url: video.url,
+					userId: message.author.id,
+					username: message.author.username
+				};
+				
+				if (newSong.durationSeconds <= 600) {
+					await this.addToQueue(message, newSong, voiceChannel);
+				}
+			}
+
+			return message.reply(`I've put your playlist **${playlist.title}** into the queue, starting off with **${videos[0].title}**.`);
+		} catch (err) {
+			this.logger.error('Error occured when adding a playlist to the queue', err);
+
+			return message.reply(
+				'An error occurred when trying to add your playlist to the queue:'
+				+ `\`\`\`\n${err.message}\`\`\``);
+		}
+	 }
+
+		/**
+		 * Play song from YouTube video URL
+		 */
+	 private async handleYouTubeVideoURL(message: Message, url: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
+		try {
+			const video: IYouTubeVideo = await this.youtube.getVideo(url);
+			if (!video) { return message.reply('I wasn\'t able to load that song. Please make sure the link is correct.'); }
 			const newSong: IQueuedSong = {
+				durationSeconds: video.durationSeconds,
 				nickname: message.member.nickname,
 				title: video.title,
 				url: video.url,
@@ -82,46 +121,50 @@ import { AppLogger } from '../../util/app-logger';
 				username: message.author.username
 			};
 
+			if (video.durationSeconds > 600) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
+			if (video.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.')}
 			await this.addToQueue(message, newSong, voiceChannel);
+
+			return message.reply(`I've put **${newSong.title}** into the queue.`);
+		} catch (err) {
+			this.logger.error('Error occured when playing from video URL', err);
+
+			return message.reply(
+				'An error occurred when trying to add your video to the queue:'
+				+ `\`\`\`\n${err.message}\`\`\``);
 		}
-
-		return message.reply(`I've put your playlist **${playlist.title}** into the queue, starting off with **${videos[0].title}**.`);
-	 }
-
-		/**
-		 * Play song from YouTube video URL
-		 */
-	 private async handleYouTubeVideoURL(message: Message, url: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
-		const video: IYouTubeVideo = await this.youtube.getVideo(url);
-		if (!video) { return message.reply('I wasn\'t able to load that song. Please make sure the link is correct.'); }
-		const newSong: IQueuedSong = {
-			nickname: message.member.nickname,
-			title: video.title,
-			url: video.url,
-			userId: message.author.id,
-			username: message.author.username
-		};
-		await this.addToQueue(message, newSong, voiceChannel);
-
-		return message.reply(`I've put **${newSong.title}** into the queue.`);
 	 }
 
 		/**
 		 * Search for the YouTube video to play.
 		 */
 	 private async handleSearch(message: Message, song: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
-		const videos: IYouTubeVideo[] = await this.youtube.searchVideos(song, 1);
-		if (!videos) { return message.reply('I wasn\'t able to find that song. Perhaps give me a YouTube video link?'); }
-		const newSong: IQueuedSong = {
-			nickname: message.member.nickname,
-			title: videos[0].title,
-			url: videos[0].url,
-			userId: message.author.id,
-			username: message.author.username
-		};
-		await this.addToQueue(message, newSong, voiceChannel);
-			
-		return message.reply(`I've put **${newSong.title}** into the queue.`);
+		try {
+			const videos: IYouTubeVideo[] = await this.youtube.searchVideos(song, 1);
+			if (!videos) { return message.reply('I wasn\'t able to find that song. Perhaps give me a YouTube video link?'); }
+
+			const video: IYouTubeVideo = videos[0];
+			const newSong: IQueuedSong = {
+				durationSeconds: video.durationSeconds,
+				nickname: message.member.nickname,
+				title: video.title,
+				url: video.url,
+				userId: message.author.id,
+				username: message.author.username
+			};
+
+			if (video.durationSeconds > 600) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
+			if (video.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.')}
+			await this.addToQueue(message, newSong, voiceChannel);
+
+			return message.reply(`I've put **${newSong.title}** into the queue.`);
+		} catch (err) {
+			this.logger.error('Error when searching for song', err);
+
+			return message.reply(
+				'An error occurred when searching for your song:'
+				+  `\`\`\`\n${err.message}\`\`\``);
+		}
 	 }
 
 	 /**
@@ -134,15 +177,14 @@ import { AppLogger } from '../../util/app-logger';
 		if (guildQueue) { 
 			guildQueue.songs.push(song);
 		} else {
-			console.log('new queue');
 			// Create the queue for the guild
 			const newQueue: IQueue = {
-				connection: null,
 				playing: null,
+				repeat: false,
 				songs: [],
 				textChannel: message.channel as TextChannel,
 				voiceChannel,
-				volume: 5,
+				volume: 5
 			};
 			this.client.queues.set(guild.id, newQueue);
 
@@ -152,13 +194,12 @@ import { AppLogger } from '../../util/app-logger';
 			// Play the song
 			try {
 				const connection: VoiceConnection = await voiceChannel.join();
-				newQueue.connection = connection;
 				this.play(message, newQueue.songs[0]);
 			} catch (err) {
 				this.logger.error('An error has occurred when trying to play a song.', err);
 				this.client.queues.remove(guild.id);
 
-				return message.channel.send(`An error has occurred: \`${err.message}\``);
+				return message.channel.send('An error has occurred:' +  `\`\`\`\n${err.message}\`\`\``);
 			}
 		}
 	 }
@@ -167,7 +208,6 @@ import { AppLogger } from '../../util/app-logger';
 		 * Play the next song in the queue.
 		 */
 	 private play(message: Message, song: IQueuedSong): void {
-		console.log('play()');
 		const guild: Guild = message.guild;
 		const guildQueue: IQueue = this.client.queues.get(guild.id);
 	
@@ -179,21 +219,18 @@ import { AppLogger } from '../../util/app-logger';
 		}
 
 		this.client.queues.play(guild.id, song);
-		console.log(`playing ${song.title}...`);
-		const dispatcher = guildQueue.connection.playStream(ytdl(song.url))
+		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
+		const dispatcher = voiceConnection.play(ytdl(song.url))
 			.on('start', () => {
-				console.log('dispatcher started');
 				guildQueue.playing = guildQueue.songs[0];
-				guildQueue.songs.shift();
+				if (guildQueue.repeat) { guildQueue.songs.push(guildQueue.songs.shift()); }
+				else { guildQueue.songs.shift(); }
 			})
 			.on('end', () => {
-				console.log('dispatcher ended');
 				this.play(message, guildQueue.songs[0]);
 			})
 			.on('error', (err: Error) => {
-				console.log('dispatcher error');
 				this.logger.error('Dispatcher error when trying to play a song.', err);
-				this.play(message, guildQueue.songs[0]);
 			});
 		dispatcher.setVolumeLogarithmic(guildQueue.volume / 5);
 	}

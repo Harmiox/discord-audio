@@ -9,6 +9,7 @@ export class AppLogger {
   constructor(context: string) {
 		this.context = context;
     this.logger = createLogger({
+      exitOnError: true,
       transports: [
         new transports.Console({
           format: combine(label({ label: context }), timestamp(), json())
@@ -16,8 +17,7 @@ export class AppLogger {
 				new transports.File({ filename: path.join('logs/error.log'), level: 'error' }),
 				new transports.File({ filename: path.join('logs/debug.log'), level: 'debug' }),
     		new transports.File({ filename: path.join('logs/combined.log') })
-      ],
-      exitOnError: true
+      ]
     });
 	}
 	

@@ -13,6 +13,7 @@ export interface IYouTubeVideo {
 	description: string;
 	url: string;
 	shortURL: string;
+	durationSeconds: number;
 }
 
 export interface IYouTubeThumbnails {

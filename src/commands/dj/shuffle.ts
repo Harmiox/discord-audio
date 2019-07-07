@@ -1,6 +1,7 @@
 import { Command, Message } from '@yamdbf/core';
+import { VoiceConnection } from 'discord.js';
 import { StarkClient } from '../../client/stark-client';
-import { IQueuedSong } from '../../config/interfaces/music.interface';
+import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
 import { checkDjPermissions } from '../../middlewares/validate-dj';
 import { AppLogger } from '../../util/app-logger';
 
@@ -25,8 +26,12 @@ import { AppLogger } from '../../util/app-logger';
 	 }
 
 	 public async action(message: Message, args: string[]): Promise<Message | Message[]> {
-		const guildQueue = this.client.queues.get(message.guild.id);
-		if (!message.member.voiceChannel) { return message.channel.send('You have to be in the VoiceChannel to shuffle the music.'); }
+		const guildQueue: IQueue = this.client.queues.get(message.guild.id);
+		const voiceConnection: VoiceConnection = this.client.voice.connections.get(message.guild.id);
+		if (!guildQueue) { return message.reply('there doesn\'t seem to be an active queue.'); }
+		if (guildQueue.songs.length === 0) { return message.reply('it seems the queue is empty.'); }
+		if(!message.member.voice.channel) { return message.reply('you\'re not in a voice channel.'); }
+		if (!voiceConnection) { return message.reply('I was unable to find a voice connection.'); }
 		guildQueue.songs = this.shuffle(guildQueue.songs);
 
 		return message.reply('I\'ve shuffled the music for you.');

@@ -1,0 +1,20 @@
+
+Todo:
+	✔ Repeat command @done(19-07-06 20:12)
+	--> ☐ Vote to skip
+	✔ Forceskip command @done(19-07-06 20:15)
+	--> ☐ radio/live streaming
+	☐ Prevent users from playing really long videos and live videos with the play command.
+	☐ Add option to purge playlist songs from the queue.
+	--> ☐ Only allow DJ's to queue a playlist
+	☐ Add SoundCloud support
+	☐ Modify purge & stop commands
+		- purge should just clear the current queue
+		- stop should both end the queue and leave the voice channel.
+	☐ Commands to control volume, bitrate, etc.
+	☐ Song blacklist
+
+MusicSettings Per Guild:
+	☐ bitrate
+	☐ volume
+	☐ maxDuration

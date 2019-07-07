@@ -8,7 +8,7 @@ export async function checkDjPermissions(
 // @ts-ignore
 ): Promise<[Message, any[]]> {
 	if (message.guild) {
-		const member: GuildMember = message.member || await message.guild.fetchMember(message.author.id);
+		const member: GuildMember = message.member || await message.guild.members.fetch(message.author.id);
 		const modeRoleId: string = await message.guild.storage.get('modRoleId');
 		const djRoleId: string = await message.guild.storage.get('djRoleId');
 		// Has DJ Role or Mod Role

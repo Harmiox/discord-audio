@@ -41,8 +41,7 @@ export class StarkClient extends Client {
 	}
 
 	private onReady() {
-		const shardId: number = this.shard == null ? 0 : this.shard.id;
-    this.logger.info(`${this.logger.context} with shardId #${shardId} is ready (${this.guilds.size} guilds)`);
+    this.logger.info(`${this.logger.context} is ready (${this.guilds.size} guilds)`);
 	}
 
 	private onWarn(info: {}): void {
