@@ -223,19 +223,19 @@ import { AppLogger } from '../../util/app-logger';
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
 		const dispatcher = voiceConnection.play(ytdl(song.url, { filter: 'audioonly' }))
 			.on('start', () => {
-				this.logger.info('Dispatcher started.');
+				// this.logger.info('Dispatcher started.');
 				guildQueue.playing = guildQueue.songs[0];
 				if (guildQueue.repeat) { guildQueue.songs.push(guildQueue.songs.shift()); }
 				else { guildQueue.songs.shift(); }
 			})
 			.on('end', () => {
-				this.logger.info('Dispatcher ended.');
+				// this.logger.info('Dispatcher ended.');
 				this.play(message, guildQueue.songs[0]);
 			})
 			.on('error', (err: Error) => {
-				console.log(song);
+				// console.log(song);
+				// this.logger.info('Dispatcher error, calling play() function.');
 				this.logger.error(`Dispatcher error trying to play a song: `, err);
-				this.logger.info('Dispatcher error, calling play() function.');
 				this.play(message, guildQueue.songs[0]);
 			});
 		dispatcher.setVolumeLogarithmic(guildQueue.volume / 5);

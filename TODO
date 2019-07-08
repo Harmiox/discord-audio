@@ -13,6 +13,7 @@ Todo:
 		- stop should both end the queue and leave the voice channel.
 	☐ Commands to control volume, bitrate, etc.
 	☐ Song blacklist
+	☐ Leave the VoiceChannel and end the Queue when no one is left in the VoiceChannel.
 
 MusicSettings Per Guild:
 	☐ bitrate
