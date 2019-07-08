@@ -26,19 +26,14 @@ import { AppLogger } from '../../util/app-logger';
 	}
 
 	public async action(message: Message, args: string[]): Promise<Message | Message[]> {
-		const guildQueue: IQueue = this.client.queues.get(message.guild.id);
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(message.guild.id);
-		if (!guildQueue) { return message.reply('there doesn\'t seem to be an active queue.'); }
-		if (guildQueue.songs.length === 0) { return message.reply('it seems the queue is empty.'); }
-		if(!message.member.voice.channel) { return message.reply('you\'re not in a voice channel.'); }
-		if (!voiceConnection) { return message.reply('I was unable to find a voice connection.'); }
-		guildQueue.songs = [];
-
+		
 		try {
-			await voiceConnection.channel.leave();
+			this.client.queues.remove(message.guild.id);
+			if (voiceConnection) { await voiceConnection.channel.leave(); }
 		} catch (err) {
 			this.logger.info('Error when leaving voice channel.', err);
-			return message.reply('')
+			return message.reply('Error when trying to stop the music.' + `\`\`\`\n${err.message}\`\`\``);
 		}
 
 		return message.reply('way to ruin the party! I\'ve stopped the music for you.');

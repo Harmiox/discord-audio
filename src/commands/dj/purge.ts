@@ -1,5 +1,6 @@
 import { Command, Message } from '@yamdbf/core';
 import { StarkClient } from '../../client/stark-client';
+import { IQueue } from '../../config/interfaces/music.interface';
 import { checkDjPermissions } from '../../middlewares/validate-dj';
 import { AppLogger } from '../../util/app-logger';
 
@@ -24,7 +25,9 @@ import { AppLogger } from '../../util/app-logger';
 	 }
 
 	 public async action(message: Message, args: string[]): Promise<Message | Message[]> {
-		 this.client.queues.remove(message.guild.id);
+		const guildQueue: IQueue = this.client.queues.get(message.guild.id);
+		if (!guildQueue) { return message.reply('there doesn\'t seem to be an active queue.'); }
+		guildQueue.songs = [];
 
 		return message.reply('the queue has been purged.');
 	 }

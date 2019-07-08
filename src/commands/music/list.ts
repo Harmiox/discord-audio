@@ -15,6 +15,7 @@ import { AppLogger } from '../../util/app-logger';
 			desc: 'Shows you your saved playlist or another user\'s playlist if the mentioned user has one.',
 			group: 'Music',
 			guildOnly: true,
+			hidden: true, // < -- Remove When Finished
 			name: 'list',
 			usage: '<prefix>list'
 		 });

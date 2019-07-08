@@ -15,6 +15,7 @@ import { AppLogger } from '../../util/app-logger';
 			desc: 'Save the Currently Playing song to your list.',
 			group: 'Music',
 			guildOnly: true,
+			hidden: true, // < -- Remove When Finished
 			name: 'save',
 			usage: '<prefix>save'
 		 });

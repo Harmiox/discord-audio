@@ -1,12 +1,12 @@
 
 Todo:
 	✔ Repeat command @done(19-07-06 20:12)
-	--> ☐ Vote to skip
+	✔ Vote to skip @done(19-07-07 22:07)
 	✔ Forceskip command @done(19-07-06 20:15)
-	--> ☐ radio/live streaming
+	✔ radio/live streaming @done(19-07-07 22:07)
 	☐ Prevent users from playing really long videos and live videos with the play command.
 	☐ Add option to purge playlist songs from the queue.
-	--> ☐ Only allow DJ's to queue a playlist
+	✔ Only allow DJ's to queue a playlist @done(19-07-07 22:07)
 	☐ Add SoundCloud support
 	☐ Modify purge & stop commands
 		- purge should just clear the current queue

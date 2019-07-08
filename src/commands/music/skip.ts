@@ -36,8 +36,15 @@ import { AppLogger } from '../../util/app-logger';
 		if (!voiceConnection) { return message.reply('I was unable to find a voice connection.'); }
 
 		const vote: IVote = this.votes.get(guildId);
-		const threshold = Math.ceil((guildQueue.voiceChannel.members.size - 1) / 3);
+		const listenerCount: number = guildQueue.voiceChannel.members.size - 1;
+		const threshold = Math.ceil((listenerCount) / 3);
 
+		// Only person listening to music, so just skip the song.
+		if (listenerCount === 1) {
+			return message.channel.send(this.skip(guildId, guildQueue, voiceConnection)); 
+		}
+
+		// More than 1 person listening to music, so they must vote!
 		if (vote && vote.count >= 1) {
 			// Handle vote
 			const alreadyVoted: boolean = vote.users.some(user => user === message.author.id);
