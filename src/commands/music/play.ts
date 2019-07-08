@@ -223,17 +223,17 @@ import { AppLogger } from '../../util/app-logger';
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
 		const dispatcher = voiceConnection.play(ytdl(song.url))
 			.on('start', () => {
-				this.logger.debug('Dispatcher started.');
+				this.logger.info('Dispatcher started.');
 				guildQueue.playing = guildQueue.songs[0];
 				if (guildQueue.repeat) { guildQueue.songs.push(guildQueue.songs.shift()); }
 				else { guildQueue.songs.shift(); }
 			})
 			.on('end', () => {
-				this.logger.debug('Dispatcher ended.');
+				this.logger.info('Dispatcher ended.');
 				this.play(message, guildQueue.songs[0]);
 			})
 			.on('error', (err: Error) => {
-				this.logger.debug('Dispatcher error: ', err);
+				this.logger.info('Dispatcher error: ', err);
 				this.logger.error(`Dispatcher error trying to play a song: `, err);
 				this.logger.error('Dispatcher error when trying to play a song.', err);
 				// this.play(message, guildQueue.songs[0]);
