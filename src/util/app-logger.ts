@@ -15,6 +15,7 @@ export class AppLogger {
           format: combine(label({ label: context }), timestamp(), json())
 				}),
 				new transports.File({ filename: path.join('logs/error.log'), level: 'error' }),
+				new transports.File({ filename: path.join('logs/info.log'), level: 'info' }),
 				new transports.File({ filename: path.join('logs/debug.log'), level: 'debug' }),
     		new transports.File({ filename: path.join('logs/combined.log') })
       ]
@@ -39,5 +40,6 @@ export class AppLogger {
 	
 	public debug(message: string, trace?: {} | string): void {
     this.logger.debug(message, trace);
-  }
+	}
+	
 }
