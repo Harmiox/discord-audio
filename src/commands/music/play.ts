@@ -234,10 +234,9 @@ import { AppLogger } from '../../util/app-logger';
 			})
 			.on('error', (err: Error) => {
 				console.log(song);
-				this.logger.info('Dispatcher error: ', err);
 				this.logger.error(`Dispatcher error trying to play a song: `, err);
-				this.logger.error('Dispatcher error when trying to play a song.', err);
-				// this.play(message, guildQueue.songs[0]);
+				this.logger.info('Dispatcher error, calling play() function.');
+				this.play(message, guildQueue.songs[0]);
 			});
 		dispatcher.setVolumeLogarithmic(guildQueue.volume / 5);
 	}
