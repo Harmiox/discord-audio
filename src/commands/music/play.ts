@@ -144,6 +144,7 @@ import { AppLogger } from '../../util/app-logger';
 			if (!videos) { return message.reply('I wasn\'t able to find that song. Perhaps give me a YouTube video link?'); }
 
 			const video: IYouTubeVideo = videos[0];
+			if (!video) { return message.reply('I wasn\'t able to load that song. Please make sure the link is correct.'); }
 			const newSong: IQueuedSong = {
 				durationSeconds: video.durationSeconds,
 				nickname: message.member.nickname,
@@ -230,7 +231,9 @@ import { AppLogger } from '../../util/app-logger';
 				this.play(message, guildQueue.songs[0]);
 			})
 			.on('error', (err: Error) => {
+				this.logger.error(`Dispatcher error trying to play '${song.url}'`);
 				this.logger.error('Dispatcher error when trying to play a song.', err);
+				this.play(message, guildQueue.songs[0]);
 			});
 		dispatcher.setVolumeLogarithmic(guildQueue.volume / 5);
 	}
