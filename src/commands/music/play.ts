@@ -197,7 +197,7 @@ import { AppLogger } from '../../util/app-logger';
 				const connection: VoiceConnection = await voiceChannel.join();
 				this.play(message, newQueue.songs[0]);
 			} catch (err) {
-				this.logger.error('An error has occurred when trying to play a song.', err);
+				this.logger.error('An error has occurred when trying to add a song to the queue/play it..', err);
 				this.client.queues.remove(guild.id);
 
 				return message.channel.send('An error has occurred:' +  `\`\`\`\n${err.message}\`\`\``);
@@ -212,7 +212,7 @@ import { AppLogger } from '../../util/app-logger';
 		const guild: Guild = message.guild;
 		const guildQueue: IQueue = this.client.queues.get(guild.id);
 	
-		if (!song) {
+		if (!song || !song.url) {
 			guildQueue.voiceChannel.leave();
 			this.client.queues.remove(guild.id);
 
@@ -223,15 +223,18 @@ import { AppLogger } from '../../util/app-logger';
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
 		const dispatcher = voiceConnection.play(ytdl(song.url))
 			.on('start', () => {
+				this.logger.debug('Dispatcher started.');
 				guildQueue.playing = guildQueue.songs[0];
 				if (guildQueue.repeat) { guildQueue.songs.push(guildQueue.songs.shift()); }
 				else { guildQueue.songs.shift(); }
 			})
 			.on('end', () => {
+				this.logger.debug('Dispatcher ended.');
 				this.play(message, guildQueue.songs[0]);
 			})
 			.on('error', (err: Error) => {
-				this.logger.error(`Dispatcher error trying to play '${song.url}'`);
+				this.logger.debug('Dispatcher error: ', err);
+				this.logger.error(`Dispatcher error trying to play a song: `, err);
 				this.logger.error('Dispatcher error when trying to play a song.', err);
 				// this.play(message, guildQueue.songs[0]);
 			});

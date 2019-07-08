@@ -35,5 +35,9 @@ export class AppLogger {
 
   public error(message: string, trace?: {} | string): void {
     this.logger.error(message, trace);
+	}
+	
+	public debug(message: string, trace?: {} | string): void {
+    this.logger.debug(message, trace);
   }
 }
