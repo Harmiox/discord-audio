@@ -13,4 +13,8 @@ async function bootstrap(): Promise<void> {
   client.start();
 }
 
+process.on("unhandledRejection", error => {
+	logger.error("Unhandled promise rejection:", error);
+});
+
 bootstrap();
