@@ -221,7 +221,7 @@ import { AppLogger } from '../../util/app-logger';
 
 		this.client.queues.play(guild.id, song);
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
-		const dispatcher = voiceConnection.play(ytdl(song.url))
+		const dispatcher = voiceConnection.play(ytdl(song.url, { filter: 'audioonly' }))
 			.on('start', () => {
 				this.logger.info('Dispatcher started.');
 				guildQueue.playing = guildQueue.songs[0];
