@@ -103,7 +103,7 @@ import { AppLogger } from '../../util/app-logger';
 			// Play the Live YouTube video
 			try {
 				const voiceConnection: VoiceConnection = await voiceChannel.join();
-				const dispatcher = voiceConnection.play(ytdl(song.url))
+				const dispatcher = voiceConnection.play(ytdl(song.url, { filter: 'audioonly' }))
 					.on('start', () => {
 						guildQueue.playing = guildQueue.songs[0];
 						guildQueue.songs.shift();
