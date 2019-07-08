@@ -233,6 +233,7 @@ import { AppLogger } from '../../util/app-logger';
 				this.play(message, guildQueue.songs[0]);
 			})
 			.on('error', (err: Error) => {
+				console.log(song);
 				this.logger.info('Dispatcher error: ', err);
 				this.logger.error(`Dispatcher error trying to play a song: `, err);
 				this.logger.error('Dispatcher error when trying to play a song.', err);
