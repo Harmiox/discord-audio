@@ -15,11 +15,17 @@ Todo:
 	☐ SoundCloud support
 
 Commands:
-	☐ Replay (replay the current song)
+	☐ Replay (replay the current song, possible vote)
 	☐ Remove (remove a song from the queue via index, playlist, or user)
 	☐ Volume (control the volume for the dispatcher)
 	☐ Blacklist (blacklist users or songs from the bot)
+	☐ Rewind & Seek (might not add, but possibility)
 
 MusicSettings Per Guild:
 	☐ volume
-	☐ maxDuration
+	☐ maxVolume
+	☐ defaultVolume
+	☐ announceSongs
+	☐ maxDurationSeconds
+	☐ maxSongsPerUser
+	☐ maxQueueLength
