@@ -5,9 +5,12 @@ import YouTube = require('simple-youtube-api');
 import ytdl = require('ytdl-core');
 import { StarkClient } from '../../client/stark-client';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
-import { IYouTubePlaylist, IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
+import { IYouTubePlaylist, IYouTubeVideo, IScrapedYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
 import { checkChannelPermissions } from '../../middlewares/validate-channel';
 import { AppLogger } from '../../util/app-logger';
+
+// @ts-ignore
+import Search = require('scrape-youtube');
 
 /**
  * Play Command
@@ -140,22 +143,23 @@ import { AppLogger } from '../../util/app-logger';
 		 */
 	 private async handleSearch(message: Message, song: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
 		try {
-			const videos: IYouTubeVideo[] = await this.youtube.searchVideos(song, 1);
-			if (!videos) { return message.reply('I wasn\'t able to find that song. Perhaps give me a YouTube video link?'); }
+			// Webscrape YouTube for the song.
+			const searchResults: IScrapedYouTubeVideo[] = await Search(song, { limit: 1, type: 'audio' });
+			if (!searchResults || !searchResults[0]) { return message.reply('I wasn\'t able to find that song.'); }
+			const video: IScrapedYouTubeVideo = searchResults[0];
 
-			const video: IYouTubeVideo = videos[0];
-			if (!video) { return message.reply('I wasn\'t able to load that song. Please make sure the link is correct.'); }
+			// Song was found
 			const newSong: IQueuedSong = {
-				durationSeconds: video.durationSeconds,
+				durationSeconds: video.duration,
 				nickname: message.member.nickname,
 				title: video.title,
-				url: video.url,
+				url: video.link,
 				userId: message.author.id,
 				username: message.author.username
 			};
 
-			if (video.durationSeconds > 600) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
-			if (video.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.')}
+			if (newSong.durationSeconds > 600) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
+			if (newSong.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.')}
 			await this.addToQueue(message, newSong, voiceChannel);
 
 			return message.reply(`I've put **${newSong.title}** into the queue.`);

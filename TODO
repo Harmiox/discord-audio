@@ -14,8 +14,15 @@ Todo:
 	☐ Commands to control volume, bitrate, etc.
 	☐ Song blacklist
 	☐ Leave the VoiceChannel and end the Queue when no one is left in the VoiceChannel.
+	☐ Match channels bitrate
 
 MusicSettings Per Guild:
 	☐ bitrate
 	☐ volume
 	☐ maxDuration
+
+Notes:
+	☐ 204 Requests (Should turn to 205)
+	☐ 306 Requests (Should turn to 307)
+	☐ 408 Requests
+	☐ 510 Requests

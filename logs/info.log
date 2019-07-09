@@ -1,0 +1,31 @@
+{"level":"info","message":"StarkClient has been started."}
+{"level":"info","message":"Initiating Stark..."}
+{"level":"info","message":"1562665593144"}
+{"level":"info","message":"StarkClient is ready (4 guilds)"}
+{"level":"info","message":"Initiating Stark..."}
+{"level":"info","message":"StarkClient has been started."}
+{"level":"info","message":"1562666100333"}
+{"level":"info","message":"StarkClient is ready (3 guilds)"}
+{"level":"info","message":"Initiating Stark..."}
+{"level":"info","message":"1562670068153"}
+{"level":"info","message":"StarkClient has been started."}
+{"level":"info","message":"StarkClient is ready (3 guilds)"}
+{"errors":[{"domain":"usageLimits","reason":"accessNotConfigured","message":"Access Not Configured. YouTube Data API has not been used in project 439772301815 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/youtube.googleapis.com/overview?project=439772301815 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","extendedHelp":"https://console.developers.google.com/apis/api/youtube.googleapis.com/overview?project=439772301815"}],"code":403,"message":"Error when searching for songAccess Not Configured. YouTube Data API has not been used in project 439772301815 before or it is disabled. Enable it by visiting https://console.developers.google.com/apis/api/youtube.googleapis.com/overview?project=439772301815 then retry. If you enabled this API recently, wait a few minutes for the action to propagate to our systems and retry.","level":"error"}
+{"level":"info","message":"Initiating Stark..."}
+{"level":"info","message":"StarkClient has been started."}
+{"level":"info","message":"1562691397591"}
+{"level":"info","message":"StarkClient is ready (3 guilds)"}
+{"errors":[{"domain":"usageLimits","reason":"accessNotConfigured","message":"Project 84691442946 has been scheduled for deletion and cannot be used for API calls. Visit https://console.developers.google.com/iam-admin/projects?pendingDeletion=true to undelete the project.","extendedHelp":"https://console.developers.google.com/iam-admin/projects?pendingDeletion=true"}],"code":403,"message":"Error when searching for songProject 84691442946 has been scheduled for deletion and cannot be used for API calls. Visit https://console.developers.google.com/iam-admin/projects?pendingDeletion=true to undelete the project.","level":"error"}
+{"level":"info","message":"Initiating Stark..."}
+{"level":"info","message":"StarkClient has been started."}
+{"level":"info","message":"1562691531434"}
+{"level":"info","message":"StarkClient is ready (3 guilds)"}
+{"errors":[{"domain":"usageLimits","reason":"accessNotConfigured","message":"Project 84691442946 has been scheduled for deletion and cannot be used for API calls. Visit https://console.developers.google.com/iam-admin/projects?pendingDeletion=true to undelete the project.","extendedHelp":"https://console.developers.google.com/iam-admin/projects?pendingDeletion=true"}],"code":403,"message":"Error when searching for songProject 84691442946 has been scheduled for deletion and cannot be used for API calls. Visit https://console.developers.google.com/iam-admin/projects?pendingDeletion=true to undelete the project.","level":"error"}
+{"level":"info","message":"Initiating Stark..."}
+{"level":"info","message":"StarkClient has been started."}
+{"level":"info","message":"1562691830192"}
+{"level":"info","message":"StarkClient is ready (3 guilds)"}
+{"level":"info","message":"Initiating Stark..."}
+{"level":"info","message":"StarkClient has been started."}
+{"level":"info","message":"1562691851677"}
+{"level":"info","message":"StarkClient is ready (3 guilds)"}

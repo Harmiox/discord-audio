@@ -6,6 +6,18 @@ export interface IYouTubePlaylist {
 	getVideos(): Promise<IYouTubeVideo[]>;
 }
 
+export interface IScrapedYouTubeVideo {
+	thumbnail: string;
+	title: string;
+	chanel: string;
+	channel_link: string;
+	duration: number;
+	update_date: string;
+	views: number;
+	description: string;
+	link: string;
+}
+
 export interface IYouTubeVideo {
 	thumbnails: IYouTubeThumbnails;
 	title: string;
