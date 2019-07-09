@@ -13,6 +13,7 @@ import { AppLogger } from '../../util/app-logger';
 
 	 public constructor() {
 		 super({
+			aliases: [ 'q' ],
 			desc: 'Get a list of the current songs in queue.',
 			group: 'Music',
 			guildOnly: true,

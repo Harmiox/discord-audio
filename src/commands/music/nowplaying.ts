@@ -13,7 +13,7 @@ import { AppLogger } from '../../util/app-logger';
 
 	 public constructor() {
 		 super({
-			aliases: ['now'],
+			aliases: [ 'now', 'song' ],
 			desc: 'Play your saved list or play a given YouTube playlist URL.',
 			group: 'Music',
 			guildOnly: true,
