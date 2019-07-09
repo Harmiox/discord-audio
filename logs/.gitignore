@@ -1,4 +1,1 @@
-combined.log
-debug.log
-error.log
-info.logs
+*.log
