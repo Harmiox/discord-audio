@@ -1,11 +1,11 @@
 import { Command, Message } from '@yamdbf/core';
-import { Guild, TextChannel, VoiceChannel, VoiceConnection, StreamOptions } from 'discord.js';
+import { Guild, StreamOptions, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
 // @ts-ignore
 import YouTube = require('simple-youtube-api');
 import ytdl = require('ytdl-core');
 import { StarkClient } from '../../client/stark-client';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
-import { IYouTubePlaylist, IYouTubeVideo, IScrapedYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
+import { IScrapedYouTubeVideo, IYouTubePlaylist, IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
 import { checkChannelPermissions } from '../../middlewares/validate-channel';
 import { AppLogger } from '../../util/app-logger';
 
@@ -212,7 +212,7 @@ import Search = require('scrape-youtube');
 	 /**
 		 * Play the next song in the queue.
 		 */
-	 private play(message: Message, song: IQueuedSong): void {
+	 private async play(message: Message, song: IQueuedSong): Promise<void> {
 		const guild: Guild = message.guild;
 		const guildQueue: IQueue = this.client.queues.get(guild.id);
 	
@@ -227,8 +227,7 @@ import Search = require('scrape-youtube');
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
 		const ytdlOptions: {} = { filter: 'audioonly', quality: 'highestaudio' };
 		const streamOptions: StreamOptions = { bitrate: 'auto' };
-		// const dispatcher = voiceConnection.play(ytdl(song.url, ytdlOptions), streamOptions)
-		const dispatcher = voiceConnection.play('http://www.sample-videos.com/audio/mp3/wave.mp3', streamOptions)
+		const dispatcher = voiceConnection.play(ytdl(song.url, ytdlOptions), streamOptions)
 			.on('start', () => {
 				// this.logger.info('Dispatcher started.');
 				guildQueue.playing = guildQueue.songs[0];
