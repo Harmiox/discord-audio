@@ -237,11 +237,11 @@ import Search = require('scrape-youtube');
 				this.play(message, guildQueue.songs[0]);
 			})
 			.on('error', (err: Error) => {
-				console.log(err);
-				// console.log(song);
-				// this.logger.info('Dispatcher error, calling play() function.');
 				this.logger.error(`Dispatcher error trying to play a song: `, err);
-				this.play(message, guildQueue.songs[0]);
+				guildQueue.textChannel.send(`Dispatcher error: \`${err.message}\``);
+				guildQueue.voiceChannel.leave();
+				this.client.queues.remove(guild.id);
+				// this.play(message, guildQueue.songs[0]);
 			});
 		dispatcher.setVolumeLogarithmic(guildQueue.volume / 5);
 	}
