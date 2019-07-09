@@ -227,6 +227,7 @@ import Search = require('scrape-youtube');
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
 		const ytdlOptions: {} = { filter: 'audioonly', quality: 'highestaudio' };
 		const streamOptions: StreamOptions = { bitrate: 'auto' };
+		this.logger.info(song.url);
 		const dispatcher = voiceConnection.play(ytdl(song.url, ytdlOptions), streamOptions)
 			.on('start', () => {
 				// this.logger.info('Dispatcher started.');
