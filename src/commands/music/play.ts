@@ -1,5 +1,5 @@
 import { Command, Message } from '@yamdbf/core';
-import { Guild, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
+import { Guild, TextChannel, VoiceChannel, VoiceConnection, StreamOptions } from 'discord.js';
 // @ts-ignore
 import YouTube = require('simple-youtube-api');
 import ytdl = require('ytdl-core');
@@ -225,7 +225,9 @@ import Search = require('scrape-youtube');
 
 		this.client.queues.play(guild.id, song);
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
-		const dispatcher = voiceConnection.play(ytdl(song.url, { filter: 'audioonly' }), { bitrate: 'auto' })
+		const ytdlOptions: {} = { filter: 'audioonly', quality: 'highestaudio' };
+		const streamOptions: StreamOptions = { bitrate: 'auto' };
+		const dispatcher = voiceConnection.play(ytdl(song.url, ytdlOptions), streamOptions)
 			.on('start', () => {
 				// this.logger.info('Dispatcher started.');
 				guildQueue.playing = guildQueue.songs[0];

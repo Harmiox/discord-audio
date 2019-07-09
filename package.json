@@ -37,7 +37,7 @@
     "winston": "^3.2.1",
     "youtube-search-promise": "^1.0.3",
     "yt-search": "^0.4.1",
-    "ytdl-core": "^0.29.2"
+    "ytdl-core": "^0.29.3"
   },
   "devDependencies": {
     "@types/bluebird": "^3.5.27",
