@@ -81,9 +81,9 @@ import { AppLogger } from '../../util/app-logger';
 		const guildQueue = this.client.queues.get(guild.id);
 
 		if (guildQueue) { 
-			guildQueue.songs.unshift(song);
 			const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
-			if (!voiceConnection) { return message.reply('I can\'t seem to find a voice connection to strema to.'); }
+			if (!voiceConnection) { return message.reply('I can\'t seem to find a voice connection to stream on.'); }
+			guildQueue.songs.unshift(song);
 			voiceConnection.dispatcher.end();
 		} else {
 			// Create the queue for the guild
@@ -103,7 +103,7 @@ import { AppLogger } from '../../util/app-logger';
 			// Play the Live YouTube video
 			try {
 				const voiceConnection: VoiceConnection = await voiceChannel.join();
-				const dispatcher = voiceConnection.play(ytdl(song.url, { filter: 'audioonly' }))
+				const dispatcher = voiceConnection.play(ytdl(song.url, { filter: 'audioonly' }), { bitrate: 'auto' })
 					.on('start', () => {
 						guildQueue.playing = guildQueue.songs[0];
 						guildQueue.songs.shift();

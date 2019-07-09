@@ -225,7 +225,7 @@ import Search = require('scrape-youtube');
 
 		this.client.queues.play(guild.id, song);
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
-		const dispatcher = voiceConnection.play(ytdl(song.url, { filter: 'audioonly' }))
+		const dispatcher = voiceConnection.play(ytdl(song.url, { filter: 'audioonly' }), { bitrate: 'auto' })
 			.on('start', () => {
 				// this.logger.info('Dispatcher started.');
 				guildQueue.playing = guildQueue.songs[0];
