@@ -227,7 +227,8 @@ import Search = require('scrape-youtube');
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
 		const ytdlOptions: {} = { filter: 'audioonly', quality: 'highestaudio' };
 		const streamOptions: StreamOptions = { bitrate: 'auto' };
-		const dispatcher = voiceConnection.play(ytdl(song.url, ytdlOptions), streamOptions)
+		// const dispatcher = voiceConnection.play(ytdl(song.url, ytdlOptions), streamOptions)
+		const dispatcher = voiceConnection.play('http://www.sample-videos.com/audio/mp3/wave.mp3', streamOptions)
 			.on('start', () => {
 				// this.logger.info('Dispatcher started.');
 				guildQueue.playing = guildQueue.songs[0];
