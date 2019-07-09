@@ -5,18 +5,21 @@ Todo:
 	✔ Forceskip command @done(19-07-06 20:15)
 	✔ radio/live streaming @done(19-07-07 22:07)
 	✔ Prevent users from playing really long videos and live videos with the play command. @done(19-07-09 13:48)
-	☐ Add option to purge playlist songs from the queue.
 	✔ Only allow DJ's to queue a playlist @done(19-07-07 22:07)
-	☐ Add SoundCloud support
-	☐ Modify purge & stop commands
-		- purge should just clear the current queue
-		- stop should both end the queue and leave the voice channel.
-	☐ Commands to control volume, bitrate, etc.
-	☐ Song blacklist
-	☐ Leave the VoiceChannel and end the Queue when no one is left in the VoiceChannel.
 	✔ Match channels bitrate @done(19-07-09 13:47)
+	☐ Prevent duplicates in the queue.
+	☐ Leave VoiceChannel when bot is alone.
+	☐ Lyric Support
+	☐ Kareoke
+	☐ Guild Playlists
+	☐ SoundCloud support
+
+Commands:
+	☐ Replay (replay the current song)
+	☐ Remove (remove a song from the queue via index, playlist, or user)
+	☐ Volume (control the volume for the dispatcher)
+	☐ Blacklist (blacklist users or songs from the bot)
 
 MusicSettings Per Guild:
-	☐ bitrate
 	☐ volume
 	☐ maxDuration
