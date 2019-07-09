@@ -4,7 +4,7 @@ Todo:
 	✔ Vote to skip @done(19-07-07 22:07)
 	✔ Forceskip command @done(19-07-06 20:15)
 	✔ radio/live streaming @done(19-07-07 22:07)
-	✔ Prevent users from playing really long videos and live videos with the play command. @done(19-07-09 13:48)
+	✔ PlayCommand: No long duration or live videos. @done(19-07-09 13:48)
 	✔ Only allow DJ's to queue a playlist @done(19-07-07 22:07)
 	✔ Match channels bitrate @done(19-07-09 13:47)
 	☐ Prevent duplicates in the queue.
