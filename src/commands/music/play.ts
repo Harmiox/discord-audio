@@ -2,7 +2,7 @@ import { Command, Message } from '@yamdbf/core';
 import { Guild, StreamOptions, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
 // @ts-ignore
 import YouTube = require('simple-youtube-api');
-import ytdl = require('ytdl-core');
+import ytdl from 'ytdl-core';
 import { StarkClient } from '../../client/stark-client';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
 import { IScrapedYouTubeVideo, IYouTubePlaylist, IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
@@ -225,7 +225,7 @@ import Search = require('scrape-youtube');
 
 		this.client.queues.play(guild.id, song);
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
-		const ytdlOptions: {} = { filter: 'audioonly', quality: 'highestaudio' };
+		const ytdlOptions: {} = { quality: 'highestaudio' };
 		const streamOptions: StreamOptions = { bitrate: 'auto' };
 		this.logger.info(song.url);
 		const dispatcher = voiceConnection.play(ytdl(song.url, ytdlOptions), streamOptions)
