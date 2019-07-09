@@ -4,7 +4,7 @@ Todo:
 	✔ Vote to skip @done(19-07-07 22:07)
 	✔ Forceskip command @done(19-07-06 20:15)
 	✔ radio/live streaming @done(19-07-07 22:07)
-	☐ Prevent users from playing really long videos and live videos with the play command.
+	✔ Prevent users from playing really long videos and live videos with the play command. @done(19-07-09 13:48)
 	☐ Add option to purge playlist songs from the queue.
 	✔ Only allow DJ's to queue a playlist @done(19-07-07 22:07)
 	☐ Add SoundCloud support
@@ -14,15 +14,9 @@ Todo:
 	☐ Commands to control volume, bitrate, etc.
 	☐ Song blacklist
 	☐ Leave the VoiceChannel and end the Queue when no one is left in the VoiceChannel.
-	☐ Match channels bitrate
+	✔ Match channels bitrate @done(19-07-09 13:47)
 
 MusicSettings Per Guild:
 	☐ bitrate
 	☐ volume
 	☐ maxDuration
-
-Notes:
-	☐ 204 Requests (Should turn to 205)
-	☐ 306 Requests (Should turn to 307)
-	☐ 408 Requests
-	☐ 510 Requests
