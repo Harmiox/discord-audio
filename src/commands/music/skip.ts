@@ -40,7 +40,6 @@ import { MusicSettings } from '../../config/enum/common.enum';
 		const vote: IVote = this.votes.get(guildId);
 		const listenerCount: number = guildQueue.voiceChannel.members.size - 1;
 		const skipThreshold: number = await message.guild.storage.get(MusicSettings.voteToSkipThreshold);
-		message.channel.send(`Skip threshold: ${skipThreshold}`);
 		const requiredVotes = Math.ceil(listenerCount * (skipThreshold || 0.30));
 
 		// Only person listening to music, so just skip the song.
