@@ -74,7 +74,7 @@ export default class extends Command<StarkClient> {
 					break;
 				case 'voteToSkipThreshold':
 					const skipThreshold: number = parseFloat(value);
-					if (skipThreshold || skipThreshold < 0 || skipThreshold > 1) { return message.reply('you can only give a value equal or between **0.00** and **1.00**'); }
+					if (!skipThreshold || skipThreshold < 0 || skipThreshold > 1) { return message.reply('you can only give a value equal or between **0.00** and **1.00**'); }
 					resolvedValue = skipThreshold;
 					await message.guild.storage.set(option, resolvedValue);
 					break;

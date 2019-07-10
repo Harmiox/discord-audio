@@ -15,6 +15,7 @@ Todo:
 	☐ SoundCloud support
 
 Commands:
+	✔ Set (set guild's music settings) @done(19-07-10 12:00)
 	☐ Replay (replay the current song, possible vote)
 	☐ Remove (remove a song from the queue via index, playlist, or user)
 	☐ Volume (control the volume for the dispatcher)
@@ -22,10 +23,10 @@ Commands:
 	☐ Rewind & Seek (might not add, but possibility)
 
 MusicSettings Per Guild:
-	☐ maxVolume
-	☐ defaultVolume
-	☐ announceSongs
-	☐ maxDurationSeconds
-	☐ maxSongsPerUser
-	☐ maxQueueLength
-	☐ voteToSkipThreshold
+	✔ maxVolume @done(19-07-10 11:59)
+	✔ defaultVolume @done(19-07-10 11:59)
+	✔ announceSongs @done(19-07-10 11:59)
+	✔ maxDurationSeconds @done(19-07-10 11:59)
+	✔ maxSongsPerUser @done(19-07-10 11:59)
+	✔ maxQueueLength @done(19-07-10 11:59)
+	✔ voteToSkipThreshold @done(19-07-10 11:59)
