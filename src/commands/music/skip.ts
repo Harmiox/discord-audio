@@ -91,7 +91,7 @@ import { MusicSettings } from '../../config/enum/common.enum';
 
 		voiceConnection.dispatcher.end();
 
-		return `the song **${currentlyPlaying.title}** was skipped.`;
+		return `The song **${currentlyPlaying.title}** was skipped.`;
 	}
 
 	 private setTimeout(vote: IVote): number {
