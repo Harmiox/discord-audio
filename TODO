@@ -7,6 +7,7 @@ Todo:
 	✔ PlayCommand: No long duration or live videos. @done(19-07-09 13:48)
 	✔ Only allow DJ's to queue a playlist @done(19-07-07 22:07)
 	✔ Match channels bitrate @done(19-07-09 13:47)
+	☐ Allow DJ/Mod get usernames & ID's with the queue command.
 	☐ Prevent duplicates in the queue.
 	☐ Leave VoiceChannel when bot is alone.
 	☐ Lyric Support

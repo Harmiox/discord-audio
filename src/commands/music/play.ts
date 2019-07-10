@@ -1,6 +1,8 @@
 import { Command, Guild, Message } from '@yamdbf/core';
 import { StreamOptions, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
 // @ts-ignore
+import WebSearch = require('scrape-youtube');
+// @ts-ignore
 import YouTube = require('simple-youtube-api');
 import ytdl from 'ytdl-core';
 import { StarkClient } from '../../client/stark-client';
@@ -9,16 +11,13 @@ import { IScrapedYouTubeVideo, IYouTubePlaylist, IYouTubeVideo } from '../../con
 import { checkChannelPermissions } from '../../middlewares/validate-channel';
 import { AppLogger } from '../../util/app-logger';
 
-// @ts-ignore
-import Search = require('scrape-youtube');
-
 /**
  * Play Command
  */
 
  export default class extends Command<StarkClient> {
 	 private logger: AppLogger = new AppLogger('PlayCommand');
-	 private youtube: YouTube;
+	 private youtubeApi: YouTube;
 
 	 public constructor() {
 		 super({
@@ -37,7 +36,7 @@ import Search = require('scrape-youtube');
 
 	 // Setup simple-youtube-api setup
 	 public init(): void {
-		this.youtube = new YouTube(this.client.config.youtube.apiKey);
+		this.youtubeApi = new YouTube(this.client.config.youtube.apiKey);
 	 }
 
 	 public async action(message: Message, args: string[]): Promise<Message | Message[]> {
@@ -61,7 +60,7 @@ import Search = require('scrape-youtube');
 		// Add song(s) to the queue
 		if (list) {
 			// Youtube Playlist was given
-			return this.handlePlaylist(message, url, voiceChannel);
+			return message.reply('you cannot use this command to play playlists.');
 		} else if (url) {
 			// Handle Youtube video URL
 			return this.handleYouTubeVideoURL(message, url, voiceChannel);
@@ -79,10 +78,8 @@ import Search = require('scrape-youtube');
 		 * Put a YouTube playlist into the queue to be played.
 		 */
 	 private async handlePlaylist(message: Message, url: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
-		return message.reply('Playlists have been disabled.');
-
 		try {
-			const playlist: IYouTubePlaylist = await this.youtube.getPlaylist(url);
+			const playlist: IYouTubePlaylist = await this.youtubeApi.getPlaylist(url);
 			const videos: IYouTubeVideo[] = await playlist.getVideos();
 			const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
 			for (const video of videos) {
@@ -115,65 +112,67 @@ import Search = require('scrape-youtube');
 		 * Play song from YouTube video URL
 		 */
 	 private async handleYouTubeVideoURL(message: Message, url: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
-		try {
-			const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
-			const video: IYouTubeVideo = await this.youtube.getVideo(url);
-			if (!video) { return message.reply('I wasn\'t able to load that song. Please make sure the link is correct.'); }
-			const newSong: IQueuedSong = {
-				durationSeconds: video.durationSeconds,
-				nickname: message.member.nickname,
-				title: video.title,
-				url: video.url,
-				userId: message.author.id,
-				username: message.author.username
-			};
+		this.youtubeApi.getVideo(url)
+			.then(async (video: IYouTubeVideo) => {
+				const newSong: IQueuedSong = {
+					durationSeconds: video.durationSeconds,
+					nickname: message.member.nickname,
+					title: video.title,
+					url: video.url,
+					userId: message.author.id,
+					username: message.author.username
+				};
+	
+				const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
+				if (video.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
+				if (video.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.')}
+				
+				this.addToQueue(message, newSong, voiceChannel);
+			})
+			.catch((err: Error) => {
+				this.logger.error('Error occured when playing from video URL', err);
 
-			if (video.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
-			if (video.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.')}
-			
-			return this.addToQueue(message, newSong, voiceChannel);
-		} catch (err) {
-			this.logger.error('Error occured when playing from video URL', err);
+				return message.reply(
+					'An error occurred when trying to add your video to the queue:'
+					+ `\`\`\`\n${err.message}\`\`\``);
+			});
 
-			return message.reply(
-				'An error occurred when trying to add your video to the queue:'
-				+ `\`\`\`\n${err.message}\`\`\``);
-		}
+		return message;
 	 }
 
 		/**
-		 * Search for the YouTube video to play.
+		 * Search for the YouTube video to play. (Webscrape due to low quota given from Google)
 		 */
 	 private async handleSearch(message: Message, song: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
-		try {
-			const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
-			// Webscrape YouTube for the song.
-			const searchResults: IScrapedYouTubeVideo[] = await Search(song, { limit: 1, type: 'audio' });
-			if (!searchResults || !searchResults[0]) { return message.reply('I wasn\'t able to find that song.'); }
-			const video: IScrapedYouTubeVideo = searchResults[0];
+		// Webscrape YouTube for the song.
+		WebSearch(song, { limit: 1, type: 'audio' })
+			.then(async (searchResults: IScrapedYouTubeVideo[]) => {
+				const video: IScrapedYouTubeVideo = searchResults[0];
+					// Song was found
+					const newSong: IQueuedSong = {
+						durationSeconds: video.duration,
+						nickname: message.member.nickname,
+						title: video.title,
+						url: video.link,
+						userId: message.author.id,
+						username: message.author.username
+					};
 
-			// Song was found
-			const newSong: IQueuedSong = {
-				durationSeconds: video.duration,
-				nickname: message.member.nickname,
-				title: video.title,
-				url: video.link,
-				userId: message.author.id,
-				username: message.author.username
-			};
+					const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
+					if (newSong.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
+					if (newSong.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.'); }
 
-			if (newSong.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
-			if (newSong.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.'); }
-			await this.addToQueue(message, newSong, voiceChannel);
+					this.addToQueue(message, newSong, voiceChannel);
+			})
+			.catch((err: Error) => {
+				this.logger.error('Error when searching for song', err);
 
-			return message.reply(`I've added **${newSong.title}** to the queue.`);
-		} catch (err) {
-			this.logger.error('Error when searching for song', err);
-
-			return message.reply(
-				'An error occurred when searching for your song:'
-				+  `\`\`\`\n${err.message}\`\`\``);
-		}
+				return message.reply(
+					'An error occurred when searching for your song:'
+					+  `\`\`\`\n${err.message}\`\`\``);
+			});
+		
+		return message;
 	 }
 
 	 /**
@@ -184,6 +183,11 @@ import Search = require('scrape-youtube');
 		const guildQueue = this.client.queues.get(guild.id);
 
 		if (guildQueue) {
+			// Make sure the song is not already in the queue
+			for (const queuedSong of guildQueue.songs) {
+				if (queuedSong.url === song.url) { return message.reply('that song is already in the queue.'); }
+			}
+
 			// Validate that the user can add the song to the queue
 			const maxQueueLength: number = (await guild.storage.get('maxQueueLength'));
 			const maxSongsPerUser: number = (await guild.storage.get('maxSongsPerUser'));
@@ -193,8 +197,9 @@ import Search = require('scrape-youtube');
 				guildQueue.songs.forEach((queuedSong: IQueuedSong) => { if (queuedSong.userId === message.author.id) { count += 1; } });
 				if (count >= maxSongsPerUser) { return message.reply(`you can only have up to **${maxSongsPerUser}** songs in the queue.`); }
 			} 
-
 			guildQueue.songs.push(song);
+
+			return message.reply(`I've added **${song.title}** to the queue.`);
 		} else {
 			// Create the queue for the guild
 			const newQueue: IQueue = {
@@ -213,7 +218,10 @@ import Search = require('scrape-youtube');
 			// Play the song
 			try {
 				const connection: VoiceConnection = await voiceChannel.join();
-				this.play(message, newQueue.songs[0]);
+				const songToPlay: IQueuedSong = newQueue.songs[0];
+				this.play(message, songToPlay);
+
+				return message.reply(`starting to play **${songToPlay.title}**.`);
 			} catch (err) {
 				this.logger.error('An error has occurred when trying to add a song to the queue/play it..', err);
 				this.client.queues.remove(guild.id);
@@ -251,7 +259,8 @@ import Search = require('scrape-youtube');
 				const announce: boolean = await guild.storage.get('announceSongs');
 				const currPlaying: IQueuedSong = guildQueue.playing;
 				if (announce) { 
-					guildQueue.textChannel.send(`Starting to play **${currPlaying.title}** requested by **${currPlaying.username}** (${currPlaying.userId})`); 
+					guildQueue.textChannel.send(
+						`Starting to play **${currPlaying.title}** requested by **${currPlaying.username}** (${currPlaying.userId})`); 
 				}
 			})
 			.on('end', () => {
