@@ -1,5 +1,5 @@
-import { Command, Message } from '@yamdbf/core';
-import { Guild, StreamOptions, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
+import { Command, Guild, Message } from '@yamdbf/core';
+import { StreamOptions, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
 // @ts-ignore
 import YouTube = require('simple-youtube-api');
 import ytdl from 'ytdl-core';
@@ -79,9 +79,12 @@ import Search = require('scrape-youtube');
 		 * Put a YouTube playlist into the queue to be played.
 		 */
 	 private async handlePlaylist(message: Message, url: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
+		return message.reply('Playlists have been disabled.');
+
 		try {
 			const playlist: IYouTubePlaylist = await this.youtube.getPlaylist(url);
 			const videos: IYouTubeVideo[] = await playlist.getVideos();
+			const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
 			for (const video of videos) {
 				const newSong: IQueuedSong = {
 					durationSeconds: video.durationSeconds,
@@ -93,8 +96,8 @@ import Search = require('scrape-youtube');
 					username: message.author.username
 				};
 				
-				if (newSong.durationSeconds <= 600) {
-					await this.addToQueue(message, newSong, voiceChannel);
+				if (newSong.durationSeconds <= maxDuration) {
+					return this.addToQueue(message, newSong, voiceChannel);
 				}
 			}
 
@@ -113,6 +116,7 @@ import Search = require('scrape-youtube');
 		 */
 	 private async handleYouTubeVideoURL(message: Message, url: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
 		try {
+			const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
 			const video: IYouTubeVideo = await this.youtube.getVideo(url);
 			if (!video) { return message.reply('I wasn\'t able to load that song. Please make sure the link is correct.'); }
 			const newSong: IQueuedSong = {
@@ -124,11 +128,10 @@ import Search = require('scrape-youtube');
 				username: message.author.username
 			};
 
-			if (video.durationSeconds > 600) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
+			if (video.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
 			if (video.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.')}
-			await this.addToQueue(message, newSong, voiceChannel);
-
-			return message.reply(`I've put **${newSong.title}** into the queue.`);
+			
+			return this.addToQueue(message, newSong, voiceChannel);
 		} catch (err) {
 			this.logger.error('Error occured when playing from video URL', err);
 
@@ -143,6 +146,7 @@ import Search = require('scrape-youtube');
 		 */
 	 private async handleSearch(message: Message, song: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
 		try {
+			const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
 			// Webscrape YouTube for the song.
 			const searchResults: IScrapedYouTubeVideo[] = await Search(song, { limit: 1, type: 'audio' });
 			if (!searchResults || !searchResults[0]) { return message.reply('I wasn\'t able to find that song.'); }
@@ -158,11 +162,11 @@ import Search = require('scrape-youtube');
 				username: message.author.username
 			};
 
-			if (newSong.durationSeconds > 600) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
-			if (newSong.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.')}
+			if (newSong.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
+			if (newSong.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.'); }
 			await this.addToQueue(message, newSong, voiceChannel);
 
-			return message.reply(`I've put **${newSong.title}** into the queue.`);
+			return message.reply(`I've added **${newSong.title}** to the queue.`);
 		} catch (err) {
 			this.logger.error('Error when searching for song', err);
 
@@ -179,7 +183,17 @@ import Search = require('scrape-youtube');
 		const guild = message.guild;
 		const guildQueue = this.client.queues.get(guild.id);
 
-		if (guildQueue) { 
+		if (guildQueue) {
+			// Validate that the user can add the song to the queue
+			const maxQueueLength: number = (await guild.storage.get('maxQueueLength'));
+			const maxSongsPerUser: number = (await guild.storage.get('maxSongsPerUser'));
+			if (maxQueueLength > 0 && guildQueue.songs.length >= maxQueueLength) { return message.reply(`the queue is full. **(max: ${maxQueueLength})**`); }
+			if (maxSongsPerUser > 0) {
+				let count: number = 0;
+				guildQueue.songs.forEach((queuedSong: IQueuedSong) => { if (queuedSong.userId === message.author.id) { count += 1; } });
+				if (count >= maxSongsPerUser) { return message.reply(`you can only have up to **${maxSongsPerUser}** songs in the queue.`); }
+			} 
+
 			guildQueue.songs.push(song);
 		} else {
 			// Create the queue for the guild
@@ -189,7 +203,7 @@ import Search = require('scrape-youtube');
 				songs: [],
 				textChannel: message.channel as TextChannel,
 				voiceChannel,
-				volume: 5
+				volume: (await guild.storage.get('defaultVolume')) || 1
 			};
 			this.client.queues.set(guild.id, newQueue);
 
@@ -225,15 +239,20 @@ import Search = require('scrape-youtube');
 
 		this.client.queues.play(guild.id, song);
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
-		const ytdlOptions: {} = { quality: 'highestaudio' };
+		const ytdlOptions: {} = { filter: 'audioonly', quality: 'highestaudio' };
 		const streamOptions: StreamOptions = { bitrate: 'auto' };
-		this.logger.info(song.url);
 		const dispatcher = voiceConnection.play(ytdl(song.url, ytdlOptions), streamOptions)
-			.on('start', () => {
+			.on('start', async () => {
 				// this.logger.info('Dispatcher started.');
 				guildQueue.playing = guildQueue.songs[0];
 				if (guildQueue.repeat) { guildQueue.songs.push(guildQueue.songs.shift()); }
 				else { guildQueue.songs.shift(); }
+
+				const announce: boolean = await guild.storage.get('announceSongs');
+				const currPlaying: IQueuedSong = guildQueue.playing;
+				if (announce) { 
+					guildQueue.textChannel.send(`Starting to play **${currPlaying.title}** requested by **${currPlaying.username}** (${currPlaying.userId})`); 
+				}
 			})
 			.on('end', () => {
 				// this.logger.info('Dispatcher ended.');
@@ -246,6 +265,6 @@ import Search = require('scrape-youtube');
 				this.client.queues.remove(guild.id);
 				// this.play(message, guildQueue.songs[0]);
 			});
-		dispatcher.setVolumeLogarithmic(guildQueue.volume / 5);
+		dispatcher.setVolume(guildQueue.volume);
 	}
  }

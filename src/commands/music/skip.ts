@@ -5,6 +5,8 @@ import { IQueue, IQueuedSong, IVote } from '../../config/interfaces/music.interf
 import { checkChannelPermissions } from '../../middlewares/validate-channel';
 import { AppLogger } from '../../util/app-logger';
 
+import { MusicSettings } from '../../config/enum/common.enum';
+
 /**
  * Skip Command
  */
@@ -37,7 +39,9 @@ import { AppLogger } from '../../util/app-logger';
 
 		const vote: IVote = this.votes.get(guildId);
 		const listenerCount: number = guildQueue.voiceChannel.members.size - 1;
-		const threshold = Math.ceil((listenerCount) / 3);
+		const skipThreshold: number = await message.guild.storage.get(MusicSettings.voteToSkipThreshold);
+		message.channel.send(`Skip threshold: ${skipThreshold}`);
+		const requiredVotes = Math.ceil(listenerCount * (skipThreshold || 0.30));
 
 		// Only person listening to music, so just skip the song.
 		if (listenerCount === 1) {
@@ -52,7 +56,7 @@ import { AppLogger } from '../../util/app-logger';
 
 			vote.count++;
 			vote.users.push(message.author.id);
-			if (vote.count >= threshold) { 
+			if (vote.count >= requiredVotes) { 
 				return message.channel.send(this.skip(guildId, guildQueue, voiceConnection)); 
 			}
 			
@@ -69,7 +73,7 @@ import { AppLogger } from '../../util/app-logger';
 
 			const time = this.setTimeout(newVote);
 			this.votes.set(guildId, newVote);
-			const remaining = threshold - 1;
+			const remaining = requiredVotes - 1;
 
 			return message.channel.send(
 				`Starting a voteskip.`

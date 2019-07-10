@@ -22,10 +22,10 @@ Commands:
 	☐ Rewind & Seek (might not add, but possibility)
 
 MusicSettings Per Guild:
-	☐ volume
 	☐ maxVolume
 	☐ defaultVolume
 	☐ announceSongs
 	☐ maxDurationSeconds
 	☐ maxSongsPerUser
 	☐ maxQueueLength
+	☐ voteToSkipThreshold
