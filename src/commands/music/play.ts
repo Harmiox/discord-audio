@@ -185,36 +185,6 @@ import ReqPromise from 'request-promise';
 			});
 		
 		return message;
-		
-		// Webscrape YouTube for the song.
-		WebSearch(song, { limit: 1, type: 'audio' })
-			.then(async (searchResults: IScrapedYouTubeVideo[]) => {
-				const video: IScrapedYouTubeVideo = searchResults[0];
-					// Song was found
-				const newSong: IQueuedSong = {
-					durationSeconds: video.duration,
-					nickname: message.member.nickname,
-					title: video.title,
-					url: video.link,
-					userId: message.author.id,
-					username: message.author.username
-				};
-
-				const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
-				if (newSong.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
-				if (newSong.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.'); }
-
-				this.addToQueue(message, newSong, voiceChannel);
-			})
-			.catch((err: Error) => {
-				this.logger.error('Error when searching for song', err);
-
-				return message.reply(
-					'An error occurred when searching for your song:'
-					+  `\`\`\`\n${err.message}\`\`\``);
-			});
-		
-		return message;
 	 }
 
 	 /**
@@ -290,7 +260,7 @@ import ReqPromise from 'request-promise';
 		this.client.queues.play(guild.id, song);
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
 		const ytdlOptions: {} = { filter: 'audioonly', quality: 'highestaudio' };
-		const streamOptions: StreamOptions = { bitrate: 'auto' };
+		const streamOptions: StreamOptions = { bitrate: 'auto', passes: 2 };
 		const dispatcher = voiceConnection.play(ytdl(song.url, ytdlOptions), streamOptions)
 			.on('start', async () => {
 				// this.logger.info('Dispatcher started.');
