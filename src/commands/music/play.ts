@@ -11,6 +11,10 @@ import { IScrapedYouTubeVideo, IYouTubePlaylist, IYouTubeVideo } from '../../con
 import { checkChannelPermissions } from '../../middlewares/validate-channel';
 import { AppLogger } from '../../util/app-logger';
 
+import Cheerio from 'cheerio';
+import Request from 'request';
+import ReqPromise from 'request-promise';
+
 /**
  * Play Command
  */
@@ -144,25 +148,63 @@ import { AppLogger } from '../../util/app-logger';
 		 * Search for the YouTube video to play. (Webscrape due to low quota given from Google)
 		 */
 	 private async handleSearch(message: Message, song: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
+		const requestUrl: string = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(song);
+		ReqPromise(requestUrl)
+			.then(async (responseHtml: string) => {
+				const html: CheerioStatic = Cheerio.load(responseHtml);
+				const video: Cheerio = html('div#content li .yt-lockup').eq(0);
+				const href: string = video.find('a').eq(0).attr('href');
+				const durationString: string = video.find('span .video-time').text();
+				const splitDuration: string[] = durationString.split(':'); 
+				const videoDuration: number = (+splitDuration[0]) * 60 + (+splitDuration[1]); 
+				const videoTitle: string = video.find('.yt-lockup-title').children('a').text();
+				const videoUrl: string = href ? `https://www.youtube.com${href}` : null;
+				if (!videoUrl) { return message.reply('Failed to find URL for that song.'); }
+
+				const newSong: IQueuedSong = {
+					durationSeconds: videoDuration,
+					nickname: message.member.nickname,
+					title: videoTitle,
+					url: videoUrl,
+					userId: message.author.id,
+					username: message.author.username
+				};
+
+				const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
+				if (newSong.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
+				if (newSong.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.'); }
+
+				this.addToQueue(message, newSong, voiceChannel);
+			})
+			.catch((err) => {
+				this.logger.error('Error when searching for song', err);
+
+				return message.reply(
+					'An error occurred when searching for your song:'
+					+  `\`\`\`\n${err.message}\`\`\``);
+			});
+		
+		return message;
+		
 		// Webscrape YouTube for the song.
 		WebSearch(song, { limit: 1, type: 'audio' })
 			.then(async (searchResults: IScrapedYouTubeVideo[]) => {
 				const video: IScrapedYouTubeVideo = searchResults[0];
 					// Song was found
-					const newSong: IQueuedSong = {
-						durationSeconds: video.duration,
-						nickname: message.member.nickname,
-						title: video.title,
-						url: video.link,
-						userId: message.author.id,
-						username: message.author.username
-					};
+				const newSong: IQueuedSong = {
+					durationSeconds: video.duration,
+					nickname: message.member.nickname,
+					title: video.title,
+					url: video.link,
+					userId: message.author.id,
+					username: message.author.username
+				};
 
-					const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
-					if (newSong.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
-					if (newSong.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.'); }
+				const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
+				if (newSong.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
+				if (newSong.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.'); }
 
-					this.addToQueue(message, newSong, voiceChannel);
+				this.addToQueue(message, newSong, voiceChannel);
 			})
 			.catch((err: Error) => {
 				this.logger.error('Error when searching for song', err);
