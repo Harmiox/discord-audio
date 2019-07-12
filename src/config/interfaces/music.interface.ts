@@ -26,4 +26,5 @@ export interface IVote {
 	start: number;
 	textChannel: TextChannel;
 	timeout: number | null;
+	durationSeconds: number;
 }

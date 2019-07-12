@@ -39,6 +39,7 @@ import { MusicSettings } from '../../config/enum/common.enum';
 
 		const vote: IVote = this.votes.get(guildId);
 		const listenerCount: number = guildQueue.voiceChannel.members.size - 1;
+		const voteToSkipDurationSeconds: number = await message.guild.storage.get('voteToSkipDurationSeconds');
 		const skipThreshold: number = await message.guild.storage.get(MusicSettings.voteToSkipThreshold);
 		const requiredVotes = Math.ceil(listenerCount * (skipThreshold || 0.30));
 
@@ -63,6 +64,7 @@ import { MusicSettings } from '../../config/enum/common.enum';
 			// New vote
 			const newVote: IVote = {
 				count: 1,
+				durationSeconds: voteToSkipDurationSeconds || 15,
 				guildId,
 				start: Date.now(),
 				textChannel: guildQueue.textChannel,
@@ -95,7 +97,7 @@ import { MusicSettings } from '../../config/enum/common.enum';
 	}
 
 	 private setTimeout(vote: IVote): number {
-		const time = vote.start + 15000 - Date.now() + ((vote.count - 1) * 5000);
+		const time = vote.durationSeconds * 1000;
 		clearTimeout(vote.timeout);
 		vote.timeout = setTimeout(() => {
 			this.votes.delete(vote.guildId);

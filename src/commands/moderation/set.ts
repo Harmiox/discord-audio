@@ -34,7 +34,8 @@ export default class extends Command<StarkClient> {
 		+ `'maxDurationSeconds',`
 		+ `'maxSongsPerUser',`
 		+ `'maxQueueLength',`
-		+ `'voteToSkipThreshold'`
+		+ `'voteToSkipThreshold',`
+		+ `'voteToSkipDurationSeconds'`
 		+ `], value: String`))
 	public async action(message: Message, [option, value]: [string, string]): Promise<Message | Message[]> {
 		try {
@@ -76,6 +77,12 @@ export default class extends Command<StarkClient> {
 					const skipThreshold: number = parseFloat(value);
 					if (!skipThreshold || skipThreshold < 0 || skipThreshold > 1) { return message.reply('you can only give a value equal or between **0.00** and **1.00**'); }
 					resolvedValue = skipThreshold;
+					await message.guild.storage.set(option, resolvedValue);
+					break;
+				case 'voteToSkipDurationSeconds':
+					const seconds: number = parseInt(value, 10);
+					if (!seconds || seconds <= 0) { return message.reply('you can only give a a time longer than **0** seconds.'); }
+					resolvedValue = seconds;
 					await message.guild.storage.set(option, resolvedValue);
 					break;
 				default:

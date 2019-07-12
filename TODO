@@ -14,6 +14,7 @@ Todo:
 	☐ Kareoke
 	☐ Guild Playlists
 	☐ SoundCloud support
+	☐ Add a reaction to PlayCommand's response message to allow them to unqueue a song
 
 Commands:
 	✔ Set (set guild's music settings) @done(19-07-10 12:00)
