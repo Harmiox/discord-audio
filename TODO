@@ -18,8 +18,8 @@ Todo:
 
 Commands:
 	✔ Set (set guild's music settings) @done(19-07-10 12:00)
-	☐ Replay (replay the current song, possible vote)
-	☐ Remove (remove a song from the queue via index, playlist, or user)
+	✔ Replay (replay the current song, possible vote) @done(19-07-12 15:53)
+	✔ Remove (remove a song from the queue via index, playlist, or user) @done(19-07-12 15:47)
 	☐ Volume (control the volume for the dispatcher)
 	☐ Blacklist (blacklist users or songs from the bot)
 	☐ Rewind & Seek (might not add, but possibility)

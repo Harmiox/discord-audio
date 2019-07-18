@@ -1,6 +1,5 @@
 import { Command, Message } from '@yamdbf/core';
 import { StarkClient } from '../../client/stark-client';
-import { checkChannelPermissions } from '../../middlewares/validate-channel';
 import { AppLogger } from '../../util/app-logger';
 
 /**
@@ -19,9 +18,6 @@ import { AppLogger } from '../../util/app-logger';
 			name: 'playlist',
 			usage: '<prefix>playlist (optional)https://www.youtube.com/watch?v=y83x7MgzWOA&list=PLMC9KNkIncKtGvr2kFRuXBVmBev6cAJ2u'
 		 });
-
-		 // Attatch Middleware
-		 this.use((message: Message, args: any[]) => checkChannelPermissions(message, args, this));
 	 }
 
 	 public async action(message: Message, args: string[]): Promise<Message | Message[]> {

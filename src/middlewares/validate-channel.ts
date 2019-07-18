@@ -1,10 +1,10 @@
-import { Command, Message } from '@yamdbf/core';
+import { Client, Message } from '@yamdbf/core';
 import { GuildMember } from 'discord.js';
 
 export async function checkChannelPermissions(
   message: Message,
   args: any[],
-  command: Command
+  client: Client
 // @ts-ignore
 ): Promise<[Message, any[]]> {
 	if (message.guild) {
@@ -19,6 +19,6 @@ export async function checkChannelPermissions(
 		// Has DJ Role or Mod Role
 		if (member.roles.has(djRoleId) || member.roles.has(modeRoleId)) { return [message, args]; }
 		// Is an Owner
-		if (command.client.owner.indexOf(message.author.id) >= 0) { return [message, args]; }
+		if (client.owner.indexOf(message.author.id) >= 0) { return [message, args]; }
 	}
 }

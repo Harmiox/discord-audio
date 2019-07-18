@@ -75,7 +75,10 @@ import { AppLogger } from '../../util/app-logger';
 		if (removedSongs.length > 1) {
 			return message.reply(`I've removed **${removedSongs.length}** songs from the queue.`);
 		} else {
-			return message.reply(`I've removed **${removedSongs[0].title}** from the queue.`);
+			return message.reply(
+				`I've removed **${removedSongs[0].title}** from the queue. `
+				+ `This song was added by **${removedSongs[0].username}** (${removedSongs[0].userId}).
+			`);
 		}
 	 }
  }

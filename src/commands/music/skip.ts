@@ -1,11 +1,9 @@
 import { Command, Message } from '@yamdbf/core';
 import { VoiceConnection } from 'discord.js';
 import { StarkClient } from '../../client/stark-client';
-import { IQueue, IQueuedSong, IVote } from '../../config/interfaces/music.interface';
-import { checkChannelPermissions } from '../../middlewares/validate-channel';
-import { AppLogger } from '../../util/app-logger';
-
 import { MusicSettings } from '../../config/enum/common.enum';
+import { IQueue, IQueuedSong, IVote } from '../../config/interfaces/music.interface';
+import { AppLogger } from '../../util/app-logger';
 
 /**
  * Skip Command
@@ -23,9 +21,6 @@ import { MusicSettings } from '../../config/enum/common.enum';
 			name: 'skip',
 			usage: '<prefix>skip'
 		 });
-
-		 // Attatch Middleware
-		 this.use((message: Message, args: any[]) => checkChannelPermissions(message, args, this));
 	 }
  
 	 public async action(message: Message, args: string[]): Promise<Message | Message[]> {

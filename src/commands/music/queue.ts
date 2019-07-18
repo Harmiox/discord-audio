@@ -1,7 +1,6 @@
 import { Command, Message } from '@yamdbf/core';
 import { StarkClient } from '../../client/stark-client';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
-import { checkChannelPermissions } from '../../middlewares/validate-channel';
 import { AppLogger } from '../../util/app-logger';
 
 /**
@@ -20,9 +19,6 @@ import { AppLogger } from '../../util/app-logger';
 			name: 'queue',
 			usage: '<prefix>queue 5(amount of queue to get)'
 		 });
-
-		 // Attatch Middleware
-		 this.use((message: Message, args: any[]) => checkChannelPermissions(message, args, this));
 	 }
 
 	 public async action(message: Message, args: string[]): Promise<Message | Message[]> {

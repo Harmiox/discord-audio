@@ -1,12 +1,12 @@
 import { Command, Message } from '@yamdbf/core';
-import { Guild, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
+import { TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
 // @ts-ignore
 import YouTube = require('simple-youtube-api');
 import ytdl = require('ytdl-core');
 import { StarkClient } from '../../client/stark-client';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
-import { IYouTubePlaylist, IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
-import { checkChannelPermissions } from '../../middlewares/validate-channel';
+import { IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
+import { checkDjPermissions } from '../../middlewares/validate-dj';
 import { AppLogger } from '../../util/app-logger';
 
 /**
@@ -28,7 +28,7 @@ import { AppLogger } from '../../util/app-logger';
 		 });
 
 		 // Attatch Middleware
-		 this.use((message: Message, args: any[]) => checkChannelPermissions(message, args, this)); 
+		 this.use((message: Message, args: any[]) => checkDjPermissions(message, args, this)); 
 	 }
 
 	 // Setup simple-youtube-api setup

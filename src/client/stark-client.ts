@@ -1,5 +1,6 @@
-import { Client } from '@yamdbf/core';
+import { Client, Message } from '@yamdbf/core';
 import { ConfigService } from '../config/config.service';
+import { checkChannelPermissions } from '../middlewares/validate-channel';
 import { AppLogger } from '../util/app-logger';
 import { Queues } from '../util/queues';
 
@@ -24,6 +25,8 @@ export class StarkClient extends Client {
 		});
 
 		this.config = config;
+
+		this.use((message: Message, args: any[]) => checkChannelPermissions(message, args, this)); 
 
 		// Bind events to local client methods
 		this.on('ready', this.onReady);

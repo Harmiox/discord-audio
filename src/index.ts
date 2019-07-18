@@ -6,7 +6,7 @@ const logger: AppLogger = new AppLogger('Main');
 const config: ConfigService = new ConfigService();
 
 async function bootstrap(): Promise<void> {
-	logger.info('Initiating Stark...');
+	logger.info('Initiating Stark Client');
 	logger.info(`${Date.now()}`);
 
 	const client: StarkClient = new StarkClient(config);

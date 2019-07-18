@@ -7,13 +7,11 @@ import YouTube = require('simple-youtube-api');
 import ytdl from 'ytdl-core';
 import { StarkClient } from '../../client/stark-client';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
-import { IScrapedYouTubeVideo, IYouTubePlaylist, IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
-import { checkChannelPermissions } from '../../middlewares/validate-channel';
+import { IYouTubePlaylist, IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
 import { AppLogger } from '../../util/app-logger';
 
 import Cheerio from 'cheerio';
-import Request from 'request';
-import ReqPromise from 'request-promise';
+import Request from 'request-promise';
 
 /**
  * Play Command
@@ -33,9 +31,6 @@ import ReqPromise from 'request-promise';
 			ratelimit: '1/5s',
 			usage: '<prefix>play Harder to Breathe by Maroon 5',
 		 });
-
-		 // Attatch Middleware
-		 this.use((message: Message, args: any[]) => checkChannelPermissions(message, args, this)); 
 	 }
 
 	 // Setup simple-youtube-api setup
@@ -149,7 +144,7 @@ import ReqPromise from 'request-promise';
 		 */
 	 private async handleSearch(message: Message, song: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
 		const requestUrl: string = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(song);
-		ReqPromise(requestUrl)
+		Request(requestUrl)
 			.then(async (responseHtml: string) => {
 				const html: CheerioStatic = Cheerio.load(responseHtml);
 				const video: Cheerio = html('div#content li .yt-lockup').eq(0);
@@ -259,7 +254,7 @@ import ReqPromise from 'request-promise';
 
 		this.client.queues.play(guild.id, song);
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
-		const ytdlOptions: {} = { filter: 'audioonly', quality: 'highestaudio' };
+		const ytdlOptions: {} = { filter: 'audioonly' };
 		const streamOptions: StreamOptions = { bitrate: 'auto', passes: 2 };
 		const dispatcher = voiceConnection.play(ytdl(song.url, ytdlOptions), streamOptions)
 			.on('start', async () => {
