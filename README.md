@@ -6,7 +6,6 @@ A better way of playing & streaming audio on Discord. Play/stream audio from sit
 ## Table of Contents
 - [Setup](#setup)
   - [Discord](#discord-setup)
-  - [Google](#google-setup)
 - [Changelog](#changelog)
 - [Localization](#localization)
 - [Plugins](#plugins)
