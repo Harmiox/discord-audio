@@ -4,7 +4,7 @@ import { StreamOptions, TextChannel, VoiceChannel, VoiceConnection } from 'disco
 import WebSearch = require('scrape-youtube');
 // @ts-ignore
 import YouTube = require('simple-youtube-api');
-import ytdl from 'ytdl-core';
+import ytdl = require('ytdl-core-discord');
 import { StarkClient } from '../../client/stark-client';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
 import { IYouTubePlaylist, IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
@@ -252,11 +252,13 @@ import Request from 'request-promise';
 			return;
 		}
 
+		this.logger.info(`Playing: ${song.url}`);
+
 		this.client.queues.play(guild.id, song);
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
 		const ytdlOptions: {} = { filter: 'audioonly' };
-		const streamOptions: StreamOptions = { bitrate: 'auto', passes: 2 };
-		const dispatcher = voiceConnection.play(ytdl(song.url, ytdlOptions), streamOptions)
+		const streamOptions: StreamOptions = { bitrate: 'auto', passes: 2, type: 'opus' };
+		const dispatcher = voiceConnection.play(await ytdl(song.url), streamOptions)
 			.on('start', async () => {
 				// this.logger.info('Dispatcher started.');
 				guildQueue.playing = guildQueue.songs[0];
