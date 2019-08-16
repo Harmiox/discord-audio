@@ -5,13 +5,13 @@ import { AppLogger } from '../util/app-logger';
 import { Queues } from '../util/queues';
 
 /**
- * Stark Client
+ * DiscordAudio Client
  */
 
-export class StarkClient extends Client {
+export class DiscordAudioClient extends Client {
 	public queues: Queues = new Queues();
 	public config: ConfigService;
-	private logger: AppLogger = new AppLogger('StarkClient');
+	private logger: AppLogger = new AppLogger('DiscordAudioClient');
 	private disconnects: number = 0;
 
 	constructor(config: ConfigService) {
@@ -19,7 +19,7 @@ export class StarkClient extends Client {
 			commandsDir: './dist/commands',
 			owner: ['228781414986809344'], // Harmiox,
 			pause: true,
-			readyText: 'Stark Client Ready',
+			readyText: ' Client Ready',
 			token: config.discord.token,
 			unknownCommandError: false
 		});

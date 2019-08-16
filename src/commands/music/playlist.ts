@@ -1,12 +1,12 @@
 import { Command, Message } from '@yamdbf/core';
-import { StarkClient } from '../../client/stark-client';
+import { DiscordAudioClient } from '../../client/discord-audio-client';
 import { AppLogger } from '../../util/app-logger';
 
 /**
  * Playlist Command
  */
 
- export default class extends Command<StarkClient> {
+ export default class extends Command<DiscordAudioClient> {
 	 private logger: AppLogger = new AppLogger('PlaylistCommand');
 
 	 public constructor() {

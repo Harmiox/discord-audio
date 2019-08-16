@@ -5,7 +5,7 @@ import WebSearch = require('scrape-youtube');
 // @ts-ignore
 import YouTube = require('simple-youtube-api');
 import ytdl = require('ytdl-core-discord');
-import { StarkClient } from '../../client/stark-client';
+import { DiscordAudioClient } from '../../client/discord-audio-client';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
 import { IYouTubePlaylist, IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
 import { AppLogger } from '../../util/app-logger';
@@ -17,7 +17,7 @@ import Request from 'request-promise';
  * Play Command
  */
 
- export default class extends Command<StarkClient> {
+ export default class extends Command<DiscordAudioClient> {
 	 private logger: AppLogger = new AppLogger('PlayCommand');
 	 private youtubeApi: YouTube;
 

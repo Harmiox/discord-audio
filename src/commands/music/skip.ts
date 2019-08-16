@@ -1,6 +1,6 @@
 import { Command, Message } from '@yamdbf/core';
 import { VoiceConnection } from 'discord.js';
-import { StarkClient } from '../../client/stark-client';
+import { DiscordAudioClient } from '../../client/discord-audio-client';
 import { MusicSettings } from '../../config/enum/common.enum';
 import { IQueue, IQueuedSong, IVote } from '../../config/interfaces/music.interface';
 import { AppLogger } from '../../util/app-logger';
@@ -9,7 +9,7 @@ import { AppLogger } from '../../util/app-logger';
  * Skip Command
  */
 
- export default class extends Command<StarkClient> {
+ export default class extends Command<DiscordAudioClient> {
 	 private logger: AppLogger = new AppLogger('SkipCommand');
 	 private votes: Map<string, IVote> = new Map();
 

@@ -1,7 +1,7 @@
 import { Command, Message, Middleware, ResourceLoader } from '@yamdbf/core';
 import { using } from '@yamdbf/core/bin/command/CommandDecorators';
 import { TextChannel } from 'discord.js';
-import { StarkClient } from '../../client/stark-client';
+import { DiscordAudioClient } from '../../client/discord-audio-client';
 import { checkModPermissions } from '../../middlewares/validate-mod';
 import { AppLogger } from '../../util/app-logger';
 
@@ -9,7 +9,7 @@ import { AppLogger } from '../../util/app-logger';
  * Set Command
  */
 
-export default class extends Command<StarkClient> {
+export default class extends Command<DiscordAudioClient> {
 	private logger: AppLogger = new AppLogger('SetCommand');
 
 	public constructor() {

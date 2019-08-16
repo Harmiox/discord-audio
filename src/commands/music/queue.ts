@@ -1,5 +1,5 @@
 import { Command, Message } from '@yamdbf/core';
-import { StarkClient } from '../../client/stark-client';
+import { DiscordAudioClient } from '../../client/discord-audio-client';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
 import { AppLogger } from '../../util/app-logger';
 
@@ -7,7 +7,7 @@ import { AppLogger } from '../../util/app-logger';
  * Queue Command
  */
 
- export default class extends Command<StarkClient> {
+ export default class extends Command<DiscordAudioClient> {
 	 private logger: AppLogger = new AppLogger('QueueCommand');
 
 	 public constructor() {

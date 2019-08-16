@@ -1,6 +1,6 @@
 import { Command, Message } from '@yamdbf/core';
 import { User } from 'discord.js';
-import { StarkClient } from '../../client/stark-client';
+import { DiscordAudioClient } from '../../client/discord-audio-client';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
 import { checkDjPermissions } from '../../middlewares/validate-dj';
 import { AppLogger } from '../../util/app-logger';
@@ -9,7 +9,7 @@ import { AppLogger } from '../../util/app-logger';
  * Remove Command
  */
 
- export default class extends Command<StarkClient> {
+ export default class extends Command<DiscordAudioClient> {
 	 private logger: AppLogger = new AppLogger('RemoveCommand');
 
 	 public constructor() {

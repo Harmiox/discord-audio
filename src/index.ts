@@ -1,4 +1,4 @@
-import { StarkClient } from './client/stark-client';
+import { DiscordAudioClient } from './client/discord-audio-client';
 import { ConfigService } from './config/config.service';
 import { AppLogger} from './util/app-logger';
 
@@ -9,7 +9,7 @@ async function bootstrap(): Promise<void> {
 	logger.info('Initiating Stark Client');
 	logger.info(`${Date.now()}`);
 
-	const client: StarkClient = new StarkClient(config);
+	const client: DiscordAudioClient = new DiscordAudioClient(config);
   client.start();
 }
 

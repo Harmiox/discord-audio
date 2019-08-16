@@ -1,5 +1,5 @@
 import { Command, Message } from '@yamdbf/core';
-import { StarkClient } from '../../client/stark-client';
+import { DiscordAudioClient } from '../../client/discord-audio-client';
 import { IQueue } from '../../config/interfaces/music.interface';
 import { checkDjPermissions } from '../../middlewares/validate-dj';
 import { AppLogger } from '../../util/app-logger';
@@ -8,7 +8,7 @@ import { AppLogger } from '../../util/app-logger';
  * Purge Command
  */
 
- export default class extends Command<StarkClient> {
+ export default class extends Command<DiscordAudioClient> {
 	 private logger: AppLogger = new AppLogger('PurgeCommand');
 
 	 public constructor() {

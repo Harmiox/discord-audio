@@ -1,13 +1,13 @@
 import { Command, Message } from '@yamdbf/core';
 import { Role } from 'discord.js';
-import { StarkClient } from '../../client/stark-client';
+import { DiscordAudioClient } from '../../client/discord-audio-client';
 import { AppLogger } from '../../util/app-logger';
 
 /**
  * SetDJRole Command
  */
 
- export default class extends Command<StarkClient> {
+ export default class extends Command<DiscordAudioClient> {
 	 private logger: AppLogger = new AppLogger('SetDJRoleCommand');
 
 	 public constructor() {

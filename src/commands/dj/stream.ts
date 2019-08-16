@@ -3,7 +3,7 @@ import { TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
 // @ts-ignore
 import YouTube = require('simple-youtube-api');
 import ytdl = require('ytdl-core');
-import { StarkClient } from '../../client/stark-client';
+import { DiscordAudioClient } from '../../client/discord-audio-client';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
 import { IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
 import { checkDjPermissions } from '../../middlewares/validate-dj';
@@ -13,7 +13,7 @@ import { AppLogger } from '../../util/app-logger';
  * Stream Command
  */
 
- export default class extends Command<StarkClient> {
+ export default class extends Command<DiscordAudioClient> {
 	 private logger: AppLogger = new AppLogger('StreamCommand');
 	 private youtube: YouTube;
 
