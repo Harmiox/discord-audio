@@ -256,9 +256,9 @@ import Request from 'request-promise';
 
 		this.client.queues.play(guild.id, song);
 		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
-		const ytdlOptions: {} = { filter: 'audioonly' };
+		const ytdlOptions: {} = { range: { start: '0' } };
 		const streamOptions: StreamOptions = { bitrate: 'auto', passes: 2, type: 'opus' };
-		const dispatcher = voiceConnection.play(await ytdl(song.url), streamOptions)
+		const dispatcher = voiceConnection.play(await ytdl(song.url, ytdlOptions), streamOptions)
 			.on('start', async () => {
 				// this.logger.info('Dispatcher started.');
 				guildQueue.playing = guildQueue.songs[0];

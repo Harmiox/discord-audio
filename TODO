@@ -23,6 +23,7 @@ Commands:
 	☐ Volume (control the volume for the dispatcher)
 	☐ Blacklist (blacklist users or songs from the bot)
 	☐ Rewind & Seek (might not add, but possibility)
+	☐ Stop (allow vote to stop)
 
 MusicSettings Per Guild:
 	✔ maxVolume @done(19-07-10 11:59)
