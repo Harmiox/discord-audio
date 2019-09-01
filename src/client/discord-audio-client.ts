@@ -19,7 +19,7 @@ export class DiscordAudioClient extends Client {
 
 	public player: LavaLink.PlayerManager;
 	public helper: LavaLinkHelper;
-	private nodes = [{ host: "127.0.0.1", port: 2333, password: "youshallnotpass" }];
+	private nodes = [{ host: '173.212.245.60', port: 2333, password: 'youshallnotpass' }];
 
 	constructor(config: ConfigService) {
 		super({
