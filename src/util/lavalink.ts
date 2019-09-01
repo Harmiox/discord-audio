@@ -23,7 +23,6 @@ export class LavaLinkHelper {
 						this.logger.error('Failed to find song: ', err);
 						reject(null);
 					});
-			console.log(res);
 
 			if (!res.data) { reject("User doesn't exist!"); }
 			// this.logger.info('Received Data: ', res.data);

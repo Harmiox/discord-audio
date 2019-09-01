@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import * as Joi from 'joi';
 import { IDiscordConfig } from './interfaces/discord-config.interface';
 import { IEnvConfig } from './interfaces/env-config.interface';
-import { IYouTubeConfig } from './interfaces/youtube-config.interface';
+import { ILavaLinkConfig } from './interfaces/lavalink-config.interface';
 dotenv.config({path: '/.env'});
 dotenv.load();
 
@@ -21,9 +21,11 @@ export class ConfigService {
     };
 	}
 	
-	public get youtube(): IYouTubeConfig {
+	public get lavalink(): ILavaLinkConfig {
     return {
-      apiKey: this.envConfig.YOUTUBE_API_KEY,
+			host: this.envConfig.LAVALINK_HOST,
+			password: this.envConfig.LAVALINK_PASSWORD,
+			port: parseInt(this.envConfig.LAVALINK_PORT, 10)
     };
   }
 
@@ -47,8 +49,10 @@ export class ConfigService {
       // Discord
 			DISCORD_BOT_TOKEN: Joi.string().required(),
 			
-			// YouTube
-			YOUTUBE_API_KEY: Joi.string().required()
+			// LavaLink
+			LAVALINK_HOST: Joi.string().required().default('127.0.0.1'),
+			LAVALINK_PASSWORD: Joi.string().required(),
+			LAVALINK_PORT: Joi.number().required().default(2333)
 
     }).unknown();
 

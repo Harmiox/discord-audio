@@ -1,11 +1,10 @@
 import { Client, Message } from '@yamdbf/core';
+import LavaLink from 'discord.js-lavalink';
 import { ConfigService } from '../config/config.service';
 import { checkChannelPermissions } from '../middlewares/validate-channel';
 import { AppLogger } from '../util/app-logger';
-import { Queues } from '../util/queues';
-
-import LavaLink from 'discord.js-lavalink';
 import { LavaLinkHelper } from '../util/lavalink';
+import { Queues } from '../util/queues';
 
 /**
  * DiscordAudio Client
@@ -19,7 +18,6 @@ export class DiscordAudioClient extends Client {
 
 	public player: LavaLink.PlayerManager;
 	public helper: LavaLinkHelper;
-	private nodes = [{ host: '173.212.245.60', port: 2333, password: 'youshallnotpass' }];
 
 	constructor(config: ConfigService) {
 		super({
@@ -31,8 +29,10 @@ export class DiscordAudioClient extends Client {
 			unknownCommandError: false
 		});
 
+		// Bind config to client
 		this.config = config;
 
+		// Permissions
 		this.use((message: Message, args: any[]) => checkChannelPermissions(message, args, this)); 
 
 		// Bind events to local client methods
@@ -52,7 +52,12 @@ export class DiscordAudioClient extends Client {
 	}
 
 	private onClientReady() {
-		this.player = new LavaLink.PlayerManager(this, this.nodes, {
+		const nodes = [{ 
+			host: this.config.lavalink.host, 
+			password: this.config.lavalink.password,
+			port: this.config.lavalink.port
+		}];
+		this.player = new LavaLink.PlayerManager(this, nodes, {
 			shards: (this.shard && this.shard.count) || 1,
 			user: this.user.id
 		});
