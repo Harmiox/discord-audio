@@ -1,11 +1,8 @@
 import { Command, Message } from '@yamdbf/core';
-import { TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
-// @ts-ignore
-import YouTube = require('simple-youtube-api');
-import ytdl = require('ytdl-core');
+import { TextChannel, VoiceChannel } from 'discord.js';
 import { DiscordAudioClient } from '../../client/discord-audio-client';
+import { IYouTubeSearch } from '../../config/interfaces/lavalink.interface';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
-import { IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
 import { checkDjPermissions } from '../../middlewares/validate-dj';
 import { AppLogger } from '../../util/app-logger';
 
@@ -13,30 +10,24 @@ import { AppLogger } from '../../util/app-logger';
  * Stream Command
  */
 
- export default class extends Command<DiscordAudioClient> {
-	 private logger: AppLogger = new AppLogger('StreamCommand');
-	 private youtube: YouTube;
+export default class extends Command<DiscordAudioClient> {
+	private logger: AppLogger = new AppLogger('StreamCommand');
 
-	 public constructor() {
-		 super({
-			desc: 'Stream a YouTube livestream.',
-			group: 'Music',
-			guildOnly: true,
-			name: 'stream',
-			ratelimit: '1/5s',
-			usage: '<prefix>stream https://www.youtube.com/watch?v=OlP_FYgSEtM',
-		 });
+	public constructor() {
+		super({
+		desc: 'Stream a YouTube livestream.',
+		group: 'Music',
+		guildOnly: true,
+		name: 'stream',
+		ratelimit: '1/5s',
+		usage: '<prefix>stream https://www.youtube.com/watch?v=OlP_FYgSEtM',
+		});
 
-		 // Attatch Middleware
-		 this.use((message: Message, args: any[]) => checkDjPermissions(message, args, this)); 
-	 }
-
-	 // Setup simple-youtube-api setup
-	 public init(): void {
-		this.youtube = new YouTube(this.client.config.youtube.apiKey);
-	 }
-
-	 public async action(message: Message, args: string[]): Promise<Message | Message[]> {
+		// Attatch Middleware
+		this.use((message: Message, args: any[]) => checkDjPermissions(message, args, this)); 
+	}
+	
+	public async action(message: Message, args: string[]): Promise<Message | Message[]> {
 		// Check if the user gave a URL for a video or playlist.
 		const url: string = args[0];
 		if (!url) { return message.reply('you didn\'t give me a link to a live YouTube video to play.'); }
@@ -54,13 +45,17 @@ import { AppLogger } from '../../util/app-logger';
 		}
 		
 		try {
-			const video: IYouTubeVideo = await this.youtube.getVideo(url);
-			if (!video) { return message.reply('I wasn\'t able to load that song. Please make sure the link is correct.'); }
+			// Search for the song
+			const searchResults: IYouTubeSearch = await this.client.helper.query(`ytsearch:${args.join(' ')}`);
+			const song = searchResults.tracks[0];
+			if (!song) { return message.reply('unable to find song.'); }
+
 			const newSong: IQueuedSong = {
-				durationSeconds: video.durationSeconds,
+				durationSeconds: song.info.length/1000,
 				nickname: message.member.nickname,
-				title: video.title,
-				url: video.url,
+				title: song.info.title,
+				track: song.track,
+				url: song.info.uri,
 				userId: message.author.id,
 				username: message.author.username
 			};
@@ -71,23 +66,23 @@ import { AppLogger } from '../../util/app-logger';
 
 			return message.reply('An error occurred:\n' + `\`\`\`\n${err.message}\`\`\``);
 		}
-	 }
+	}
 
-	 /**
-		 * Start streaming
-		 */
-	 private async stream(message: Message, song: IQueuedSong, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
+	/**
+	 * Start streaming
+	 */
+	private async stream(message: Message, song: IQueuedSong, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
 		const guild = message.guild;
 		const guildQueue = this.client.queues.get(guild.id);
 
 		if (guildQueue) { 
-			const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
-			if (!voiceConnection) { return message.reply('I can\'t seem to find a voice connection to stream on.'); }
+			if (!guildQueue.player) { return message.reply('I can\'t seem to find an active player.'); }
 			guildQueue.songs.unshift(song);
-			voiceConnection.dispatcher.end();
+			guildQueue.player.stop();
 		} else {
 			// Create the queue for the guild
 			const newQueue: IQueue = {
+				player: null,
 				playing: null,
 				repeat: false,
 				songs: [],
@@ -99,6 +94,21 @@ import { AppLogger } from '../../util/app-logger';
 
 			// Add the live video to the queue to be streamed
 			newQueue.songs.push(song);
+		}
+
+			/*
+			// Play the song
+			guildQueue.player.play(song.track);
+			guildQueue.player.once('error', (err) => {
+				this.logger.error(`LavaLink error trying to play a song: `, err);
+				guildQueue.textChannel.send(`Dispatcher error: \`${err.message}\``);
+				guildQueue.voiceChannel.leave();
+				this.client.queues.remove(guild.id);
+			});
+			guildQueue.player.once('end', async (data: any) => {
+				if (data.reason === "REPLACED") { return this.logger.info('REPLACED'); }
+				this.play(message, guildQueue.songs[0]);
+			});
 
 			// Play the Live YouTube video
 			try {
@@ -125,5 +135,6 @@ import { AppLogger } from '../../util/app-logger';
 		}
 
 		return message.channel.send(`Starting to stream **${song.title}** requested by **${message.author.username}** (${message.author.id})`);
-	 }
- }
+		*/
+	}
+}

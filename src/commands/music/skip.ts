@@ -23,14 +23,13 @@ import { AppLogger } from '../../util/app-logger';
 		 });
 	 }
  
-	 public async action(message: Message, args: string[]): Promise<Message | Message[]> {
+	 public async action(message: Message): Promise<Message | Message[]> {
 		const guildId: string = message.guild.id;
 		const guildQueue: IQueue = this.client.queues.get(guildId);
-		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guildId);
 		if (!guildQueue) { return message.reply('there doesn\'t seem to be an active queue.'); }
 		if (guildQueue.songs.length === 0) { return message.reply('it seems the queue is empty.'); }
 		if(!message.member.voice.channel) { return message.reply('you\'re not in a voice channel.'); }
-		if (!voiceConnection) { return message.reply('I was unable to find a voice connection.'); }
+		if (!guildQueue.player) { return message.reply('I was unable to find a voice connection.'); }
 
 		const vote: IVote = this.votes.get(guildId);
 		const listenerCount: number = guildQueue.voiceChannel.members.size - 1;
@@ -40,7 +39,7 @@ import { AppLogger } from '../../util/app-logger';
 
 		// Only person listening to music, so just skip the song.
 		if (listenerCount === 1) {
-			return message.channel.send(this.skip(guildId, guildQueue, voiceConnection)); 
+			return message.channel.send(this.skip(guildId, guildQueue)); 
 		}
 
 		// More than 1 person listening to music, so they must vote!
@@ -52,7 +51,7 @@ import { AppLogger } from '../../util/app-logger';
 			vote.count++;
 			vote.users.push(message.author.id);
 			if (vote.count >= requiredVotes) { 
-				return message.channel.send(this.skip(guildId, guildQueue, voiceConnection)); 
+				return message.channel.send(this.skip(guildId, guildQueue)); 
 			}
 			
 		} else {
@@ -78,7 +77,7 @@ import { AppLogger } from '../../util/app-logger';
 		}
 	 }
 
-	 private skip(guildId: string, queue: IQueue, voiceConnection: VoiceConnection): string {
+	 private skip(guildId: string, queue: IQueue): string {
 		const currentlyPlaying: IQueuedSong = queue.playing;
 		
 		if (this.votes.has(guildId)) {
@@ -86,8 +85,7 @@ import { AppLogger } from '../../util/app-logger';
 			this.votes.delete(guildId);
 		}
 
-		voiceConnection.dispatcher.end();
-
+		queue.player.stop();
 		return `The song **${currentlyPlaying.title}** was skipped.`;
 	}
 

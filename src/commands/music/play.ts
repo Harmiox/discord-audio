@@ -1,50 +1,39 @@
 import { Command, Guild, Message } from '@yamdbf/core';
-import { StreamOptions, TextChannel, VoiceChannel, VoiceConnection } from 'discord.js';
-// @ts-ignore
-import WebSearch = require('scrape-youtube');
-// @ts-ignore
-import YouTube = require('simple-youtube-api');
-import ytdl = require('ytdl-core-discord');
+import { TextChannel, VoiceChannel } from 'discord.js';
 import { DiscordAudioClient } from '../../client/discord-audio-client';
+import { IYouTubeSearch } from '../../config/interfaces/lavalink.interface';
 import { IQueue, IQueuedSong } from '../../config/interfaces/music.interface';
-import { IYouTubePlaylist, IYouTubeVideo } from '../../config/interfaces/youtube-search.interface';
 import { AppLogger } from '../../util/app-logger';
-
-import Cheerio from 'cheerio';
-import Request from 'request-promise';
 
 /**
  * Play Command
  */
 
- export default class extends Command<DiscordAudioClient> {
-	 private logger: AppLogger = new AppLogger('PlayCommand');
-	 private youtubeApi: YouTube;
+export default class extends Command<DiscordAudioClient> {
+	private logger: AppLogger = new AppLogger('PlayCommand');
 
-	 public constructor() {
-		 super({
-			aliases: [ 'p' ],
-			desc: 'Start playing music!',
-			group: 'Music',
-			guildOnly: true,
-			name: 'play',
-			ratelimit: '1/5s',
-			usage: '<prefix>play Harder to Breathe by Maroon 5',
-		 });
-	 }
+	public constructor() {
+		super({
+		aliases: [ 'p' ],
+		desc: 'Start playing music!',
+		group: 'Music',
+		guildOnly: true,
+		name: 'play',
+		ratelimit: '1/5s',
+		usage: '<prefix>play Harder to Breathe by Maroon 5',
+		});
+	}
 
-	 // Setup simple-youtube-api setup
-	 public init(): void {
-		this.youtubeApi = new YouTube(this.client.config.youtube.apiKey);
-	 }
-
-	 public async action(message: Message, args: string[]): Promise<Message | Message[]> {
-		// Check if the user gave a URL for a video or playlist.
-		let url: string;
-		const song: string = args.join(' ');
-		const list: string[] = song.match(/[?&]list=([^#\&\?]+)/i);
-		const youTubeRegEx: RegExp = new RegExp(/^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/g);
-		if (youTubeRegEx.test(args[0])) { url = args[0]; }
+	/**
+	 * 
+	 * @param message 
+	 * @param args 
+	 */
+	public async action(message: Message, args: string[]): Promise<Message | Message[]> {
+		// Search for the song
+		const searchResults: IYouTubeSearch = await this.client.helper.query(`ytsearch:${args.join(' ')}`);
+		const song = searchResults.tracks[0];
+		if (!song) { return message.reply('unable to find song.'); }
 
 		// User must be in a VoiceChannel
 		const voiceChannel: VoiceChannel = message.member.voice.channel;
@@ -56,136 +45,30 @@ import Request from 'request-promise';
 			return message.channel.send('I need the permissions to join and speak in your voice channel!');
 		}
 		
-		// Add song(s) to the queue
-		if (list) {
-			// Youtube Playlist was given
-			return message.reply('you cannot use this command to play playlists.');
-		} else if (url) {
-			// Handle Youtube video URL
-			return this.handleYouTubeVideoURL(message, url, voiceChannel);
-		} else {
-			// Search for song on YouTube
-			return this.handleSearch(message, song, voiceChannel);
-		}
-	 }
+		const newSong: IQueuedSong = {
+			durationSeconds: Math.floor(song.info.length/1000),
+			nickname: message.member.nickname,
+			title: song.info.title,
+			track: song.track,
+			url: song.info.uri,
+			userId: message.author.id,
+			username: message.author.username
+		};
 
-	 private async handleSoundCloud(message: Message): Promise<Message | Message[]> {
-		 return message.reply('Coming Soon.');
-	 }
+		const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
+		if (newSong.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
+		if (newSong.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.'); }
 
-	 /**
-		 * Put a YouTube playlist into the queue to be played.
-		 */
-	 private async handlePlaylist(message: Message, url: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
-		try {
-			const playlist: IYouTubePlaylist = await this.youtubeApi.getPlaylist(url);
-			const videos: IYouTubeVideo[] = await playlist.getVideos();
-			const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
-			for (const video of videos) {
-				const newSong: IQueuedSong = {
-					durationSeconds: video.durationSeconds,
-					nickname: message.member.nickname,
-					playlist: playlist.title,
-					title: video.title,
-					url: video.url,
-					userId: message.author.id,
-					username: message.author.username
-				};
-				
-				if (newSong.durationSeconds <= maxDuration) {
-					return this.addToQueue(message, newSong, voiceChannel);
-				}
-			}
+		return this.addToQueue(message, newSong, voiceChannel);
+	}
 
-			return message.reply(`I've put your playlist **${playlist.title}** into the queue, starting off with **${videos[0].title}**.`);
-		} catch (err) {
-			this.logger.error('Error occured when adding a playlist to the queue', err);
-
-			return message.reply(
-				'An error occurred when trying to add your playlist to the queue:'
-				+ `\`\`\`\n${err.message}\`\`\``);
-		}
-	 }
-
-		/**
-		 * Play song from YouTube video URL
-		 */
-	 private async handleYouTubeVideoURL(message: Message, url: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
-		this.youtubeApi.getVideo(url)
-			.then(async (video: IYouTubeVideo) => {
-				const newSong: IQueuedSong = {
-					durationSeconds: video.durationSeconds,
-					nickname: message.member.nickname,
-					title: video.title,
-					url: video.url,
-					userId: message.author.id,
-					username: message.author.username
-				};
-	
-				const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
-				if (video.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
-				if (video.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.')}
-				
-				this.addToQueue(message, newSong, voiceChannel);
-			})
-			.catch((err: Error) => {
-				this.logger.error('Error occured when playing from video URL', err);
-
-				return message.reply(
-					'An error occurred when trying to add your video to the queue:'
-					+ `\`\`\`\n${err.message}\`\`\``);
-			});
-
-		return message;
-	 }
-
-		/**
-		 * Search for the YouTube video to play. (Webscrape due to low quota given from Google)
-		 */
-	 private async handleSearch(message: Message, song: string, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
-		const requestUrl: string = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(song);
-		Request(requestUrl)
-			.then(async (responseHtml: string) => {
-				const html: CheerioStatic = Cheerio.load(responseHtml);
-				const video: Cheerio = html('div#content li .yt-lockup').eq(0);
-				const href: string = video.find('a').eq(0).attr('href');
-				const durationString: string = video.find('span .video-time').text();
-				const splitDuration: string[] = durationString.split(':'); 
-				const videoDuration: number = (+splitDuration[0]) * 60 + (+splitDuration[1]); 
-				const videoTitle: string = video.find('.yt-lockup-title').children('a').text();
-				const videoUrl: string = href ? `https://www.youtube.com${href}` : null;
-				if (!videoUrl) { return message.reply('Failed to find URL for that song.'); }
-
-				const newSong: IQueuedSong = {
-					durationSeconds: videoDuration,
-					nickname: message.member.nickname,
-					title: videoTitle,
-					url: videoUrl,
-					userId: message.author.id,
-					username: message.author.username
-				};
-
-				const maxDuration: number = (await message.guild.storage.get('maxDurationSeconds')) || 600;
-				if (newSong.durationSeconds > maxDuration) { return message.reply('you can\'t play videos longer than 10 minutes.'); }
-				if (newSong.durationSeconds === 0) { return message.reply('you can only play live YouTube videos with the stream command.'); }
-
-				this.addToQueue(message, newSong, voiceChannel);
-			})
-			.catch((err) => {
-				this.logger.error('Error when searching for song', err);
-
-				return message.reply(
-					'An error occurred when searching for your song:'
-					+  `\`\`\`\n${err.message}\`\`\``);
-			});
-		
-		return message;
-	 }
-
-	 /**
-		 * Add a song at the end of the queue.
-		 */
-	 private async addToQueue(message: Message, song: IQueuedSong, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
+	/**
+	 * 
+	 * @param message 
+	 * @param song 
+	 * @param voiceChannel 
+	 */
+	private async addToQueue(message: Message, song: IQueuedSong, voiceChannel: VoiceChannel): Promise<Message | Message[]> {
 		const guild = message.guild;
 		const guildQueue = this.client.queues.get(guild.id);
 
@@ -210,6 +93,7 @@ import Request from 'request-promise';
 		} else {
 			// Create the queue for the guild
 			const newQueue: IQueue = {
+				player: null,
 				playing: null,
 				repeat: false,
 				songs: [],
@@ -224,7 +108,6 @@ import Request from 'request-promise';
 
 			// Play the song
 			try {
-				const connection: VoiceConnection = await voiceChannel.join();
 				const songToPlay: IQueuedSong = newQueue.songs[0];
 				this.play(message, songToPlay);
 
@@ -236,15 +119,18 @@ import Request from 'request-promise';
 				return message.channel.send('An error has occurred:' +  `\`\`\`\n${err.message}\`\`\``);
 			}
 		}
-	 }
+	}
 
-	 /**
-		 * Play the next song in the queue.
-		 */
-	 private async play(message: Message, song: IQueuedSong): Promise<void> {
+	/**
+	 * 
+	 * @param message 
+	 * @param song 
+	 */
+	private async play(message: Message, song: IQueuedSong): Promise<any> {
 		const guild: Guild = message.guild;
 		const guildQueue: IQueue = this.client.queues.get(guild.id);
-	
+
+		// Make sure there is a song in the queue.
 		if (!song || !song.url) {
 			guildQueue.voiceChannel.leave();
 			this.client.queues.remove(guild.id);
@@ -252,37 +138,44 @@ import Request from 'request-promise';
 			return;
 		}
 
+		// Make sure there is a player.
+		if (!guildQueue.player) {
+			guildQueue.player = await this.client.player.join({ 
+				channel: message.member.voice.channel.id, 
+				guild: message.guild.id, 
+				host: this.client.player.nodes.first().host 
+			}, { selfdeaf: true });
+			if (!guildQueue.player) { return guildQueue.textChannel.send('I was unable initiate the player.'); }
+		}
+
+		// Playing now
 		this.logger.info(`Playing: ${song.url}`);
-
 		this.client.queues.play(guild.id, song);
-		const voiceConnection: VoiceConnection = this.client.voice.connections.get(guild.id);
-		const ytdlOptions: {} = { range: { start: '0' } };
-		const streamOptions: StreamOptions = { bitrate: 'auto', passes: 2, type: 'opus' };
-		const dispatcher = voiceConnection.play(await ytdl(song.url, ytdlOptions), streamOptions)
-			.on('start', async () => {
-				// this.logger.info('Dispatcher started.');
-				guildQueue.playing = guildQueue.songs[0];
-				if (guildQueue.repeat) { guildQueue.songs.push(guildQueue.songs.shift()); }
-				else { guildQueue.songs.shift(); }
 
-				const announce: boolean = await guild.storage.get('announceSongs');
-				const currPlaying: IQueuedSong = guildQueue.playing;
-				if (announce) { 
-					guildQueue.textChannel.send(
-						`Starting to play **${currPlaying.title}** requested by **${currPlaying.username}** (${currPlaying.userId})`); 
-				}
-			})
-			.on('end', () => {
-				// this.logger.info('Dispatcher ended.');
-				this.play(message, guildQueue.songs[0]);
-			})
-			.on('error', (err: Error) => {
-				this.logger.error(`Dispatcher error trying to play a song: `, err);
-				guildQueue.textChannel.send(`Dispatcher error: \`${err.message}\``);
-				guildQueue.voiceChannel.leave();
-				this.client.queues.remove(guild.id);
-				// this.play(message, guildQueue.songs[0]);
-			});
-		dispatcher.setVolume(guildQueue.volume);
+		// Update the queue
+		guildQueue.playing = guildQueue.songs[0];
+		if (guildQueue.repeat) { guildQueue.songs.push(guildQueue.songs.shift()); }
+		else { guildQueue.songs.shift(); }
+
+		// Announce the currently playing song.
+		const announce: boolean = await guild.storage.get('announceSongs');
+		const currPlaying: IQueuedSong = guildQueue.playing;
+		if (announce) { 
+			guildQueue.textChannel.send(
+				`Starting to play **${currPlaying.title}** requested by **${currPlaying.username}** (${currPlaying.userId})`); 
+		}
+
+		// Play the song
+		guildQueue.player.play(song.track);
+		guildQueue.player.once('error', (err) => {
+			this.logger.error(`LavaLink error trying to play a song: `, err);
+			guildQueue.textChannel.send(`Dispatcher error: \`${err.message}\``);
+			guildQueue.voiceChannel.leave();
+			this.client.queues.remove(guild.id);
+		});
+		guildQueue.player.once('end', async (data: any) => {
+			if (data.reason === "REPLACED") { return this.logger.info('REPLACED'); }
+			this.play(message, guildQueue.songs[0]);
+		});
 	}
- }
+}

@@ -28,13 +28,11 @@ import { AppLogger } from '../../util/app-logger';
 
 	 public async action(message: Message, args: string[]): Promise<Message | Message[]> {
 		const guildQueue: IQueue = this.client.queues.get(message.guild.id);
-		const voiceConnection: VoiceConnection = this.client.voice.connections.get(message.guild.id);
 		if (!guildQueue) { return message.reply('there doesn\'t seem to be an active queue.'); }
 		if (guildQueue.songs.length === 0) { return message.reply('it seems the queue is empty.'); }
 		if(!message.member.voice.channel) { return message.reply('you\'re not in a voice channel.'); }
-		if (!voiceConnection) { return message.reply('I was unable to find a voice connection.'); }
-		voiceConnection.dispatcher.end();
-
+		guildQueue.player.stop();
+		
 		return message.reply('force skipped.');
 	 }
  }

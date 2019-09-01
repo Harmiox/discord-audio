@@ -4,6 +4,9 @@ import { checkChannelPermissions } from '../middlewares/validate-channel';
 import { AppLogger } from '../util/app-logger';
 import { Queues } from '../util/queues';
 
+import LavaLink from 'discord.js-lavalink';
+import { LavaLinkHelper } from '../util/lavalink';
+
 /**
  * DiscordAudio Client
  */
@@ -13,6 +16,10 @@ export class DiscordAudioClient extends Client {
 	public config: ConfigService;
 	private logger: AppLogger = new AppLogger('DiscordAudioClient');
 	private disconnects: number = 0;
+
+	public player: LavaLink.PlayerManager;
+	public helper: LavaLinkHelper;
+	private nodes = [{ host: "127.0.0.1", port: 2333, password: "youshallnotpass" }];
 
 	constructor(config: ConfigService) {
 		super({
@@ -30,6 +37,7 @@ export class DiscordAudioClient extends Client {
 
 		// Bind events to local client methods
 		this.on('ready', this.onReady);
+		this.on('clientReady', this.onClientReady);
 		this.on('warn', this.onWarn);
 		this.on('pause', this.onPause);
 		this.on('error', this.onError);
@@ -41,6 +49,14 @@ export class DiscordAudioClient extends Client {
 		this.logger.info(`${this.logger.context} has been started.`);
 
 		return super.start();
+	}
+
+	private onClientReady() {
+		this.player = new LavaLink.PlayerManager(this, this.nodes, {
+			shards: (this.shard && this.shard.count) || 1,
+			user: this.user.id
+		});
+		this.helper = new LavaLinkHelper(this.player.nodes.first());
 	}
 
 	private onReady() {
