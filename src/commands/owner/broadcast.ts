@@ -4,20 +4,20 @@ import { checkDjPermissions } from '../../middlewares/validate-dj';
 import { AppLogger } from '../../util/app-logger';
 
 /**
- * Blacklist Command
+ * Broadcast Command
  */
 
  export default class extends Command<DiscordAudioClient> {
-	 private logger: AppLogger = new AppLogger('BlacklistCommand');
+	 private logger: AppLogger = new AppLogger('BroadcastCommand');
 
 	 public constructor() {
 		 super({
-			desc: 'Blacklist',
-			group: 'DJ',
+			desc: 'Broadcast to every server.',
+			group: 'Owner',
 			guildOnly: true,
 			hidden: true, // <--- Remove when finished.
-			name: 'blacklist',
-			usage: '<prefix>blacklist'
+			name: 'broadcast',
+			usage: '<prefix>broadcast'
 		 });
 
 		 // Attatch Middleware

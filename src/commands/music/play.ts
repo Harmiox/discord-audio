@@ -132,8 +132,8 @@ export default class extends Command<DiscordAudioClient> {
 
 		// Make sure there is a song in the queue.
 		if (!song || !song.url) {
-			guildQueue.voiceChannel.leave();
 			this.client.queues.remove(guild.id);
+			guildQueue.player.destroy();
 
 			return;
 		}
@@ -174,6 +174,7 @@ export default class extends Command<DiscordAudioClient> {
 			this.client.queues.remove(guild.id);
 		});
 		guildQueue.player.once('end', async (data: any) => {
+			this.logger.info(`ENDED: ${data.reason}`);
 			if (data.reason === "REPLACED") { return this.logger.info('REPLACED'); }
 			this.play(message, guildQueue.songs[0]);
 		});

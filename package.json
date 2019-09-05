@@ -45,6 +45,7 @@
     "scrape-youtube": "0.0.4",
     "sequelize": "^5.9.2",
     "simple-youtube-api": "^5.2.1",
+    "snekfetch": "^4.0.4",
     "winston": "^3.2.1",
     "youtube-search-promise": "^1.0.3",
     "yt-search": "^0.4.1",
@@ -57,11 +58,12 @@
     "@types/joi": "^14.3.3",
     "@types/node": "^12.0.12",
     "@types/sequelize": "^4.28.3",
+    "@types/snekfetch": "^4.0.2",
     "@types/validator": "^10.11.1",
     "@types/ws": "^6.0.1",
+    "tslint": "^5.18.0",
     "tslint-config-prettier": "^1.15.0",
     "tslint-microsoft-contrib": "^5.2.1",
-    "tslint": "^5.18.0",
     "typescript": "^3.5.2"
   }
 }

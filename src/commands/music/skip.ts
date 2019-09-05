@@ -1,5 +1,4 @@
 import { Command, Message } from '@yamdbf/core';
-import { VoiceConnection } from 'discord.js';
 import { DiscordAudioClient } from '../../client/discord-audio-client';
 import { MusicSettings } from '../../config/enum/common.enum';
 import { IQueue, IQueuedSong, IVote } from '../../config/interfaces/music.interface';

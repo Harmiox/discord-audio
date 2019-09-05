@@ -1,7 +1,6 @@
 import { Command, Message } from '@yamdbf/core';
-import { VoiceConnection } from 'discord.js';
+import LavaLink from 'discord.js-lavalink';
 import { DiscordAudioClient } from '../../client/discord-audio-client';
-import { IQueue } from '../../config/interfaces/music.interface';
 import { checkDjPermissions } from '../../middlewares/validate-dj';
 import { AppLogger } from '../../util/app-logger';
 
@@ -26,16 +25,13 @@ import { AppLogger } from '../../util/app-logger';
 	}
 
 	public async action(message: Message, args: string[]): Promise<Message | Message[]> {
-		const voiceConnection: VoiceConnection = this.client.voice.connections.get(message.guild.id);
+		const player = this.client.player.find((p: LavaLink.Player) => p.id === message.guild.id);
+		const guildQueue = this.client.queues.get(message.guild.id);
+		if (!player) { return message.reply('Nothing to stop.'); }
+		if (guildQueue) { this.client.queues.remove(message.guild.id); }
 		
-		try {
-			this.client.queues.remove(message.guild.id);
-			if (voiceConnection) { await voiceConnection.channel.leave(); }
-		} catch (err) {
-			this.logger.info('Error when leaving voice channel.', err);
-			return message.reply('Error when trying to stop the music.' + `\`\`\`\n${err.message}\`\`\``);
-		}
+		this.client.player.leave(message.guild.id);
 
-		return message.reply('way to ruin the party! I\'ve stopped the music for you.');
+		return message.reply('way to ruin the party! I\'m stopping the music for you.');
 	}
  }

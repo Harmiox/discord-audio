@@ -24,7 +24,7 @@ export class LavaLinkHelper {
 						reject(null);
 					});
 
-			if (!res.data) { reject("User doesn't exist!"); }
+			if (!res || !res.data) { reject('Doesn\'t Exist!'); }
 			// this.logger.info('Received Data: ', res.data);
 			resolve(res.data);
 		});
