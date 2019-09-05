@@ -133,7 +133,7 @@ export default class extends Command<DiscordAudioClient> {
 		// Make sure there is a song in the queue.
 		if (!song || !song.url) {
 			this.client.queues.remove(guild.id);
-			guildQueue.player.destroy();
+			this.client.player.leave(guild.id);
 
 			return;
 		}
